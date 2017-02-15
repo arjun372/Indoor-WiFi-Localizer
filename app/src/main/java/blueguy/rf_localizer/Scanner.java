@@ -35,6 +35,7 @@ public abstract class Scanner {
         return updated;
     }
 
+
     public abstract boolean startScan();
     public abstract boolean stopScan();
 }

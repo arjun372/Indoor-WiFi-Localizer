@@ -69,6 +69,16 @@ public class MainActivity extends Activity implements SensorEventListener{
 
     private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
+//    class WriterCallback {
+//        public void performWrite(long timestamp, String featureID, String value) {
+//
+//        }
+//    }
+//
+//    onCallBack(asdasd) {
+//        write
+//    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
