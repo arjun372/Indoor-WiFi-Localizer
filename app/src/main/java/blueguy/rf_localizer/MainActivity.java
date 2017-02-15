@@ -92,12 +92,17 @@ public class MainActivity extends Activity implements SensorEventListener{
     protected void onResume(){
         super.onResume();
 
+        Log.v("onResume", "Resumed activity!");
+
         /** reset all counters **/
         fileTime = new SimpleDateFormat("HH:mm", Locale.US).format(new Date());
         count = 0;
+
         lastScanResult_Wifi  = new ArrayList<>();
+        lastScanResult_Cell  = new ArrayList<>();
 
         mContext = getApplicationContext();
+
         startScan();
     }
 
@@ -155,9 +160,9 @@ public class MainActivity extends Activity implements SensorEventListener{
             Log.v("requestScan", "requesting");
             if(wM==null) wM = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
             wM.startScan();
-            poller.postDelayed(requestScan, 100);
             final List<ScanResult> networks = wM.getScanResults();
             writeResults(networks);
+            poller.postDelayed(requestScan, 100);
         }
     };
     private void setWakeLock(final boolean state) {
@@ -218,6 +223,7 @@ public class MainActivity extends Activity implements SensorEventListener{
 
     private static List<String> getWifiAPInfo(final List<ScanResult> networks) {
         List<String> newWiFiInfo = new ArrayList<>();
+
         for(ScanResult network: networks) {
             final String line = (network.timestamp/1000)+ "," + network.BSSID + "," + network.level + "," + current_label+"\n";
             if(!lastScanResult_Wifi.contains(line)) {
@@ -225,6 +231,7 @@ public class MainActivity extends Activity implements SensorEventListener{
                 newWiFiInfo.add(line);
             }
         }
+
         return newWiFiInfo;
     }
 
