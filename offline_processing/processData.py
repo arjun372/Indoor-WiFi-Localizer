@@ -5,18 +5,18 @@ import pandas as pd
 import numpy as np
 import glob
 
-INDEX_COLUMN = 't'
-LABEL_COLUMN = 'class'
-_INPUT_FILE_ = 'arjun-2/all.csv'
-
+INDEX_COLUMN  = 't'
+LABEL_COLUMN  = 'class'
 
 wifi_hash = set([])
+
 train_data_dir = glob.glob('training_data/*.csv')
 test_data_dir  = glob.glob('test_data/*.csv')
 num_cores      = 1#multiprocessing.cpu_count()
 
 labels   = ['one',        'two',     'three',    'arjun_bathroom', 'four',       'arjun_room', 'unknown', 'current_label']
 readable = ['piano_room', 'kitchen', 'bathroom', 'bathroom',       'arjun_room', 'arjun_room', '?', '?']
+
 def importFile(file_):
     global wifi_hash
     dframe = pd.read_csv(file_, names=["t", "SSID", "RSSI", "class"])
@@ -27,17 +27,11 @@ def importFile(file_):
     return dframe
 
 def buildFeatureList(data):
-    size_d = len(data)
     global wifi_hash
+    size_d = len(data)
     for ssid in list(wifi_hash):data[ssid] = pd.Series(np.empty(size_d) * np.nan, index=data.index)
-    for x in xrange(0, size_d):
-        data.set_value(x, data.ix[x]['SSID'],  data.ix[x]['RSSI'])
-        #data.set_value(x, data.ix[x]['class'], readable[labels.index(data.ix[x]['class'])])
-        #data.ix[x]['class'] = readable[labels.index(data.ix[x]['class'])]
+    for x in xrange(0, size_d):data.set_value(x, data.ix[x]['SSID'],  data.ix[x]['RSSI'])
     return data
-    # dframe = pd.read_csv(file_, names=["t", "SSID", "RSSI", "class"] + list(wifi_hash))
-    # for x in xrange(0, len(dframe)):dframe.set_value(x, dframe.ix[x]['SSID'], dframe.ix[x]['RSSI'])
-    # dframe.drop([INDEX_COLUMN] + ["SSID", "RSSI"], axis=1).fillna('?').to_csv('raw_output_arjun2.csv', encoding='utf-8', index=False)
 
 if __name__ == "__main__":
 
@@ -57,13 +51,18 @@ if __name__ == "__main__":
 
     exit()
 
-
-## Start building raw-output dataframe
-dframe = pd.read_csv(open(_INPUT_FILE_), names=[INDEX_COLUMN] + ["SSID", "RSSI"] +[LABEL_COLUMN] + list(wifi_hash))#, index_col=INDEX_COLUMN)
-for x in xrange(0, len(dframe)):dframe.set_value(x, dframe.ix[x]['SSID'], dframe.ix[x]['RSSI'])
-dframe.drop([INDEX_COLUMN] + ["SSID", "RSSI"], axis=1).fillna('?').to_csv('raw_output_arjun2.csv', encoding='utf-8', index=False)
+# ## Start building raw-output dataframe
+# dframe = pd.read_csv(open(_INPUT_FILE_), names=[INDEX_COLUMN] + ["SSID", "RSSI"] +[LABEL_COLUMN] + list(wifi_hash))#, index_col=INDEX_COLUMN)
+# for x in xrange(0, len(dframe)):dframe.set_value(x, dframe.ix[x]['SSID'], dframe.ix[x]['RSSI'])
+# dframe.drop([INDEX_COLUMN] + ["SSID", "RSSI"], axis=1).fillna('?').to_csv('raw_output_arjun2.csv', encoding='utf-8', index=False)
 
 # SSID   = [str(i.split(',')[1]) for i in open(_INPUT_FILE_).readlines()]
 # dframe = pd.read_csv(file_, names=["t", "SSID", "RSSI", "class"] + list(wifi_hash))
 # for x in xrange(0, len(dframe)):dframe.set_value(x, dframe.ix[x]['SSID'], dframe.ix[x]['RSSI'])
 # dframe.drop([INDEX_COLUMN] + ["SSID", "RSSI"], axis=1).fillna('?').to_csv('raw_output_arjun2.csv', encoding='utf-8', index=False)
+    #data.set_value(x, data.ix[x]['class'], readable[labels.index(data.ix[x]['class'])])
+    #data.ix[x]['class'] = readable[labels.index(data.ix[x]['class'])]
+
+    # dframe = pd.read_csv(file_, names=["t", "SSID", "RSSI", "class"] + list(wifi_hash))
+    # for x in xrange(0, len(dframe)):dframe.set_value(x, dframe.ix[x]['SSID'], dframe.ix[x]['RSSI'])
+    # dframe.drop([INDEX_COLUMN] + ["SSID", "RSSI"], axis=1).fillna('?').to_csv('raw_output_arjun2.csv', encoding='utf-8', index=False)
