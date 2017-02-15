@@ -5,6 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -20,6 +24,15 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.wearable.activity.WearableActivity;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
+import android.telephony.CellLocation;
+import android.telephony.CellSignalStrength;
+import android.telephony.NeighboringCellInfo;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -30,12 +43,15 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SensorEventListener{
 
-    private static String fileTime = "";
+    private static String fileTime="";
     private Context mContext;
     private static String current_label = "unknown";
     private static Handler poller = new Handler();
@@ -43,7 +59,8 @@ public class MainActivity extends Activity {
     private static WifiManager wM = null;
     private static WifiManager.WifiLock  wLock = null;
     private static PowerManager.WakeLock pLock = null;
-    private static List<String> lastScanResult  = new ArrayList<>();
+    private static List<String> lastScanResult_Wifi = new ArrayList<>();
+    private static List<String> lastScanResult_Cell = new ArrayList<>();
 
     private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
@@ -56,10 +73,13 @@ public class MainActivity extends Activity {
 
     public void onButtonClicked(View view) {
 
-        final String new_label = ((EditText) findViewById(R.id.label_value)).getText().toString();
+        String new_label = ((EditText) findViewById(R.id.label_value)).getText().toString();
 
         if(new_label.equals(current_label))
             return;
+
+        if(new_label.equals(""))
+            new_label = "unknown";
 
         current_label = new_label;
         Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
@@ -73,9 +93,9 @@ public class MainActivity extends Activity {
         super.onResume();
 
         /** reset all counters **/
-        fileTime = "_"+System.currentTimeMillis()+"_";
+        fileTime = new SimpleDateFormat("HH:mm", Locale.US).format(new Date());
         count = 0;
-        lastScanResult  = new ArrayList<>();
+        lastScanResult_Wifi  = new ArrayList<>();
 
         mContext = getApplicationContext();
         startScan();
@@ -90,15 +110,44 @@ public class MainActivity extends Activity {
     private void startScan() {
         setWakeLock(true);
         registerReceiver(scanResultReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        setGyroscope(true);
         poller.post(requestScan);
     }
 
     private void stopScan() {
+        setGyroscope(false);
         unregisterReceiver(scanResultReceiver);
         poller.removeCallbacks(requestScan);
         setWakeLock(false);
     }
 
+    private void setGyroscope(final boolean state) {
+        final SensorManager mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        final Sensor gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        try {
+            if(state) {
+                mSensorManager.registerListener(this, gyroscope, 1000000, 0);
+            } else {
+                mSensorManager.unregisterListener(this);
+            }
+        } catch (Exception e) {
+            Log.e("setGyro", "Unable to perform gyroscope operation!"+e);
+        }
+    }
+
+    private static void writeGyro(final String line) {
+        try {
+            final File targetFolder = new File(FS_rootDirectory+"/"+fileTime);
+            targetFolder.mkdirs();
+            final FileWriter writer = new FileWriter(new File(targetFolder, "gyro.csv"), true);
+            writer.write(line);
+            writer.flush();
+            writer.close();
+        }  catch (IOException e) {
+            Log.e("writeGyro", "Unable to write to file:gyro");
+        }
+    }
 
     private Runnable requestScan = new Runnable() {
         @Override
@@ -143,41 +192,128 @@ public class MainActivity extends Activity {
 
     private static long count = 0;
 
-    private void writeResults(final List<ScanResult> networks) {
-//        if(!networks.isEmpty()) {
-//            Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-//            v.vibrate(200);
-//        }
-        for(ScanResult network : networks) {
+    private synchronized void writeResults(final List<ScanResult> networks) {
 
-            final String line = network.timestamp + "," + network.BSSID + "," + network.level + "," + current_label+"\n";
+        List<String> allInfo = getCellTowerInfo();
+        List<String> wifiInfo = getWifiAPInfo(networks);
+        allInfo.addAll(wifiInfo);
 
-            if(lastScanResult.contains(line)) {
-                Log.v("networkLogger", "Removing repeating entry: "+line);
+        try {
+            final File targetFolder = new File(FS_rootDirectory+"/"+fileTime);
+            targetFolder.mkdirs();
+            final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
+
+            for(String singleLine : allInfo) {
+                writer.write(singleLine);
+                updateCount();
             }
-            else {
 
-                try {
-                    Log.d("networkLogger", line);
-                    final File targetFolder = new File(FS_rootDirectory+"/"+fileTime);
-                    targetFolder.mkdirs();
-                    final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
-                    writer.write(line);
-                    writer.flush();
-                    writer.close();
-                    lastScanResult.add(line);
-                    updateCount();
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+            writer.flush();
+            writer.close();
 
+        }  catch (IOException e) {
+            Log.e("writeResults", "Unable to write to file!");
+        }
+    }
+
+    private static List<String> getWifiAPInfo(final List<ScanResult> networks) {
+        List<String> newWiFiInfo = new ArrayList<>();
+        for(ScanResult network: networks) {
+            final String line = (network.timestamp/1000)+ "," + network.BSSID + "," + network.level + "," + current_label+"\n";
+            if(!lastScanResult_Wifi.contains(line)) {
+                lastScanResult_Wifi.add(line);
+                newWiFiInfo.add(line);
             }
         }
+        return newWiFiInfo;
     }
 
     private synchronized void updateCount() {
         TextView view = (TextView) findViewById(R.id.count);
         view.setText(current_label+":"+(++count));
     };
+
+    private List<String> getCellTowerInfo() {
+
+        TelephonyManager tel = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        List<String> newCellTowers = new ArrayList<>();
+
+        final List<CellInfo> neighCells = tel.getAllCellInfo();
+
+        for(CellInfo singleCellInfo : neighCells) {
+            int identity = 0;
+            long timestamp = 0;
+            int rssi = 0;
+
+            if(singleCellInfo instanceof CellInfoWcdma) {
+                CellInfoWcdma info = (CellInfoWcdma) singleCellInfo;
+                identity = info.getCellIdentity().getCid();
+                timestamp = (info.getTimeStamp() / 1000000);
+                rssi = info.getCellSignalStrength().getDbm();
+            }
+
+            else if (singleCellInfo instanceof CellInfoCdma) {
+                CellInfoCdma info = (CellInfoCdma) singleCellInfo;
+                identity  = info.getCellIdentity().getNetworkId();
+                timestamp = info.getTimeStamp();
+                rssi      = info.getCellSignalStrength().getDbm();
+            }
+
+            else {
+                CellInfoLte info = (CellInfoLte) singleCellInfo;
+                identity  = info.getCellIdentity().getCi();
+                timestamp = info.getTimeStamp();
+                rssi      = info.getCellSignalStrength().getDbm();
+            }
+
+            String line = timestamp + "," + identity + "," + rssi + "," + current_label+"\n";
+            if(!lastScanResult_Cell.contains(line)) {
+                lastScanResult_Cell.add(line);
+                newCellTowers.add(line);
+            }
+        }
+
+        return newCellTowers;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        final double x2 = event.values[0]*event.values[0];
+        final double y2 = event.values[1]*event.values[1];
+        final double z2 = event.values[2]*event.values[2];
+        final double gyroMag = Math.sqrt(x2+y2+z2);
+        final String velocity = String.format(Locale.US, "%.4f", gyroMag);
+        final String line = (event.timestamp/1000000) +"," + velocity + "\n";
+        writeGyro(line);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 }
+//for(ScanResult network : networks) {
+//final String line = network.timestamp + "," + network.BSSID + "," + network.level + "," + current_label+"\n";
+//
+//        if(lastScanResult_Wifi.contains(line)) {
+//        //Log.v("networkLogger", "Removing repeating entry: "+line);
+//        }
+//        else {
+//
+//        try {
+////Log.d("networkLogger", line);
+//final File targetFolder = new File(FS_rootDirectory+"/"+fileTime);
+//        targetFolder.mkdirs();
+//final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
+//        writer.write(line);
+//        writer.flush();
+//        writer.close();
+//        lastScanResult_Wifi.add(line);
+//        updateCount();
+//        }
+//        catch (IOException e) {
+//        e.printStackTrace();
+//        }
+//
+//        }
+//        }
