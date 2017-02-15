@@ -46,11 +46,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity implements SensorEventListener{
 
+    private static long count = 0;
     private static String fileTime="";
     private Context mContext;
     private static String current_label = "unknown";
@@ -59,6 +61,9 @@ public class MainActivity extends Activity implements SensorEventListener{
     private static WifiManager wM = null;
     private static WifiManager.WifiLock  wLock = null;
     private static PowerManager.WakeLock pLock = null;
+
+    private static HashMap<String, Long> staleNetworks = new HashMap<>();
+
     private static List<String> lastScanResult_Wifi = new ArrayList<>();
     private static List<String> lastScanResult_Cell = new ArrayList<>();
 
@@ -195,7 +200,6 @@ public class MainActivity extends Activity implements SensorEventListener{
         }
     };
 
-    private static long count = 0;
 
     private synchronized void writeResults(final List<ScanResult> networks) {
 
