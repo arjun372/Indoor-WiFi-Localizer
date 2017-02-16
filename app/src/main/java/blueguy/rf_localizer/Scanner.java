@@ -1,6 +1,5 @@
 package blueguy.rf_localizer;
 
-import android.net.wifi.ScanResult;
 import android.util.Pair;
 
 import java.util.ArrayList;
