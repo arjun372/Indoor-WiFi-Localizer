@@ -78,18 +78,3 @@ public class WifiScanner extends Scanner {
 
 
 }
-
-class WifiScanReceiver extends BroadcastReceiver {
-
-    private boolean registered = false;
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-//            if(wM==null) wM =  (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-//            final List<ScanResult> networks = wM.getScanResults();
-//            writeResults(networks);
-    }
-
-
-    public boolean isRegistered() {return registered;}
-}
