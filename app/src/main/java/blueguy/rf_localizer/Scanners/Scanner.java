@@ -59,7 +59,6 @@ public abstract class Scanner {
     protected abstract boolean StartScan();
     protected abstract boolean StopScan();
 
-
     private void setWakeLock(final boolean state) {
 
         final Context mContext = RF_Localizer_Application.getAppContext();
