@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,26 @@ public class ScanService extends Service {
         /** TODO : ensure scanned data gets dumped to file. **/
     }
 
+    private static ScannerCallback mScannerCallback = new ScannerCallback() {
+        @Override
+        void onScanResult(List<Pair<Long, List<Object>>> dataList) {
+            Log.d("callback", dataList.toString());
+        }
+    };
+
     private static List<Scanner> initScanners() {
+
         List<Scanner> curScanners = new ArrayList<>();
+
+        curScanners.add(new WifiScanner(mScannerCallback));
+//        curScanners.add(new CellScanner(mScannerCallback));
+//        curScanners.add(new VelocityScanner(mScannerCallback));
+//        curScanners.add(new AltitudeScanner(mScannerCallback));
+//        curScanners.add(new RotationScanner(mScannerCallback));
+
+        for(Scanner single : curScanners) {
+            single.startScan();
+        }
 
         return curScanners;
     }

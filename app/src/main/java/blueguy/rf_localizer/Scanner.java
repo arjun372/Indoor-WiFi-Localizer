@@ -15,9 +15,6 @@ public abstract class Scanner {
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
     protected ScannerCallback mScannerCalback;
 
-    abstract class ScannerCallback {
-        abstract void onScanResult(List<Pair<Long, List<Object>>> dataList);
-    }
 
     protected Scanner(ScannerCallback scannerCallback) {
         mScannerCalback = scannerCallback;
@@ -46,6 +43,24 @@ public abstract class Scanner {
 
     public abstract boolean startScan();
     public abstract boolean stopScan();
+}
+abstract class ScannerCallback {
+    abstract void onScanResult(List<Pair<Long, List<Object>>> dataList);
+}
 
+class WifiScanner extends Scanner {
 
+    protected WifiScanner(ScannerCallback scannerCallback) {
+        super(scannerCallback);
+    }
+
+    @Override
+    public boolean startScan() {
+        return false;
+    }
+
+    @Override
+    public boolean stopScan() {
+        return false;
+    }
 }
