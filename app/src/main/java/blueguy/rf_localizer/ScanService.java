@@ -12,8 +12,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
@@ -29,7 +32,37 @@ public class ScanService extends Service {
     // TODO: A new hash map needs to be created here for each new training/predicting environment
     //          Ex. Boelter Hall vs Engineering 6, BUT not for each room in each building
     //          Thus, this probably needs to be persistent somewhere.
-    private HashMap<String, List<Object>> mDataBase = new HashMap<>();
+    private static HashMap<String, List<Object>> mDataBase = new HashMap<>();
+    private static final String KEY_TIMESTAMP = "timestamp";
+    private static final String VAL_UNKNOWN = "?";
+
+    /**
+     * mAddToDataBase is a helper function that takes into account the structure of the HashMap,
+     *      which links String keys to lists of any Object values (with toString implemented).
+     *      Specifically:
+     *          • Creates a new HashMap if mDataBase is not initialized
+     *          • Then adds the value to the list corresponding to the given key in the HashMap if
+     *              it already exists in mDataBase.
+     *              • Otherwise, a new list is created with the given value and put in mDataBase
+     *
+     * @param key       The String denoting the key to be used when putting into the mDataBase.
+     * @param value     The Object value to put into the mDataBase with given key.
+     */
+    private static void mAddToDataBase(String key, Object value) {
+        // If the mDataBase is null, create a new empty one for it
+        if (mDataBase == null) {
+            mDataBase = new HashMap<>();
+        }
+
+        // If the mDataBase already contains the list for this key, then add this value to it
+        if (mDataBase.containsKey(key)) {
+            mDataBase.get(key).add(value);
+        }
+        // Otherwise, create a new list initialized with the given value and input it in the hashmap
+        else {
+            mDataBase.put(key, new ArrayList<Object>(Collections.singletonList(value)));
+        }
+    }
 
     private static List<Scanner> scannerList;
     /**
@@ -59,31 +92,49 @@ public class ScanService extends Service {
 
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
-//        public void onScanResult(List<Pair<Long, List<Object>>> dataList) {
         public void onScanResult(List<DataObject> dataList) {
             Log.d("callback", dataList.toString());
+
+            for (DataObject dataObject : dataList) {
+                // TODO: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
+
+                // First, push the timestamp on to the HashMap for this new data row
+                mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
+
+                // Start keeping track of feature names that were updated so the rest can be filled with unknowns
+                Set<String> unUpdatedKeys = mDataBase.keySet();
+
+                // Add each data value to the mDataBase HashMap
+                for (Pair<String, Object> dataPair : dataObject.mDataVals) {
+                    mAddToDataBase(dataObject.mID + dataPair.first, dataPair.second);
+
+                    // Remove this feature name from unUpdatedKeys
+                    unUpdatedKeys.remove(dataObject.mID + dataPair.first);
+                }
+
+                // For each unUpdatedKey, fill in with unknown value, '?'
+                for (String key : unUpdatedKeys) {
+                    mAddToDataBase(key, VAL_UNKNOWN);
+                }
+            }
 
 //            List<String> allInfo = getCellTowerInfo();
 //            List<String> wifiInfo = getWifiAPInfo(networks);
 //            allInfo.addAll(wifiInfo);
 
-            String testFolderName = "testingFolder";
-
-            try {
-                final File targetFolder = new File(FS_rootDirectory+"/"+testFolderName);
-                targetFolder.mkdirs();
-                final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
-
-                for (DataObject dataObject : dataList) {
-                    // TODO: Need to create add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
-                }
-
-                writer.flush();
-                writer.close();
-
-            }  catch (IOException e) {
-                Log.e("writeResults", "Unable to write to file!");
-            }
+//            String testFolderName = "testingFolder";
+//
+//            try {
+//                final File targetFolder = new File(FS_rootDirectory+"/"+testFolderName);
+//                targetFolder.mkdirs();
+//                final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
+//
+//                writer.flush();
+//                writer.close();
+//
+//            }  catch (IOException e) {
+//                Log.e("writeResults", "Unable to write to file!");
+//            }
         }
     };
 
