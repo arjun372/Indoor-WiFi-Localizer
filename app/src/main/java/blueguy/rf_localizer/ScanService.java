@@ -6,10 +6,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
 
+    private static List<Scanner> scannerList;
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -23,7 +27,27 @@ public class ScanService extends Service {
 
     @Override
     public void onCreate() {
-        // TODO :: Instantiate scanner objects here
+        scannerList = initScanners();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "Destroying scan service");
+
+        scannerList = removeScanners(scannerList);
+
+        /** TODO : ensure scanned data gets dumped to file. **/
+    }
+
+    private static List<Scanner> initScanners() {
+        List<Scanner> curScanners = new ArrayList<>();
+
+        return curScanners;
+    }
+
+    private static List<Scanner> removeScanners(List<Scanner> currentScanners) {
+
+        return null;
     }
 
     @Override
@@ -35,13 +59,7 @@ public class ScanService extends Service {
         return START_NOT_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        Log.i(TAG, "Destroying scan service");
 
-        //TODO :: destroy all scanner objects. ensure scanned data gets dumped to file.
-
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
