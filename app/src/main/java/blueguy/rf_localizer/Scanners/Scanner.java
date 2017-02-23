@@ -1,10 +1,14 @@
-package blueguy.rf_localizer;
+package blueguy.rf_localizer.Scanners;
 
+import android.content.Context;
+import android.os.PowerManager;
 import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import blueguy.rf_localizer.RF_Localizer_Application;
 
 /**
  * Created by arjun on 2/14/17.
@@ -15,6 +19,7 @@ public abstract class Scanner {
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
     protected ScannerCallback mScannerCallback;
 
+    private PowerManager.WakeLock powerLock;
 
     protected Scanner(ScannerCallback scannerCallback) {
         mScannerCallback = scannerCallback;
@@ -41,26 +46,31 @@ public abstract class Scanner {
     }
 
 
-    public abstract boolean startScan();
-    public abstract boolean stopScan();
-}
-abstract class ScannerCallback {
-    abstract void onScanResult(List<Pair<Long, List<Object>>> dataList);
-}
-
-class WifiScanner extends Scanner {
-
-    protected WifiScanner(ScannerCallback scannerCallback) {
-        super(scannerCallback);
+    public void startScan() {
+        setWakeLock(true);
+        StartScan();
     }
 
-    @Override
-    public boolean startScan() {
-        return false;
+    public void stopScan() {
+        setWakeLock(false);
+        StopScan();
     }
 
-    @Override
-    public boolean stopScan() {
-        return false;
+    protected abstract boolean StartScan();
+    protected abstract boolean StopScan();
+
+
+    private void setWakeLock(final boolean state) {
+
+        final Context mContext = RF_Localizer_Application.getAppContext();
+        final PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
+        if(powerLock == null) {
+            powerLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Scanner");
+        }
+
+        if(state && !powerLock.isHeld()) powerLock.acquire();
+        if(!state && powerLock.isHeld()) powerLock.release();
     }
 }
+

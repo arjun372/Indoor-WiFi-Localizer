@@ -10,6 +10,10 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
+import blueguy.rf_localizer.Scanners.Scanner;
+import blueguy.rf_localizer.Scanners.ScannerCallback;
+import blueguy.rf_localizer.Scanners.WifiScanner;
+
 public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
@@ -42,7 +46,7 @@ public class ScanService extends Service {
 
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
-        void onScanResult(List<Pair<Long, List<Object>>> dataList) {
+        public void onScanResult(List<Pair<Long, List<Object>>> dataList) {
             Log.d("callback", dataList.toString());
         }
     };

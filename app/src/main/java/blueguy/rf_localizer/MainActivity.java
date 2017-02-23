@@ -104,17 +104,17 @@ public class MainActivity extends Activity implements SensorEventListener{
     }
 
     @Override
-    protected void onResume(){
-        super.onResume();
+        protected void onResume(){
+            super.onResume();
 
-        Log.v("onResume", "Resumed activity!");
+            Log.v("onResume", "Resumed activity!");
 
-        /** reset all counters **/
-        fileTime = new SimpleDateFormat("HH:mm", Locale.US).format(new Date());
-        count = 0;
+            /** reset all counters **/
+            fileTime = new SimpleDateFormat("HH:mm", Locale.US).format(new Date());
+            count = 0;
 
-        lastScanResult_Wifi  = new ArrayList<>();
-        lastScanResult_Cell  = new ArrayList<>();
+            lastScanResult_Wifi  = new ArrayList<>();
+            lastScanResult_Cell  = new ArrayList<>();
 
         mContext = getApplicationContext();
 
