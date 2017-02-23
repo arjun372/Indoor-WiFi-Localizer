@@ -3,13 +3,19 @@ package blueguy.rf_localizer;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
 import blueguy.rf_localizer.Scanners.WifiScanner;
@@ -17,6 +23,13 @@ import blueguy.rf_localizer.Scanners.WifiScanner;
 public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
+    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+
+    // HashMap containing the data to write, whenever we want
+    // TODO: A new hash map needs to be created here for each new training/predicting environment
+    //          Ex. Boelter Hall vs Engineering 6, BUT not for each room in each building
+    //          Thus, this probably needs to be persistent somewhere.
+    private HashMap<String, List<Object>> mDataBase = new HashMap<>();
 
     private static List<Scanner> scannerList;
     /**
@@ -46,8 +59,31 @@ public class ScanService extends Service {
 
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
-        public void onScanResult(List<Pair<Long, List<Object>>> dataList) {
+//        public void onScanResult(List<Pair<Long, List<Object>>> dataList) {
+        public void onScanResult(List<DataObject> dataList) {
             Log.d("callback", dataList.toString());
+
+//            List<String> allInfo = getCellTowerInfo();
+//            List<String> wifiInfo = getWifiAPInfo(networks);
+//            allInfo.addAll(wifiInfo);
+
+            String testFolderName = "testingFolder";
+
+            try {
+                final File targetFolder = new File(FS_rootDirectory+"/"+testFolderName);
+                targetFolder.mkdirs();
+                final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
+
+                for (DataObject dataObject : dataList) {
+                    // TODO: Need to create add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
+                }
+
+                writer.flush();
+                writer.close();
+
+            }  catch (IOException e) {
+                Log.e("writeResults", "Unable to write to file!");
+            }
         }
     };
 
