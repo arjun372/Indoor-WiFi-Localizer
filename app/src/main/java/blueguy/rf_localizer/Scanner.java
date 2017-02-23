@@ -13,14 +13,14 @@ import java.util.List;
 public abstract class Scanner {
 
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
-    protected ScannerCallback mScannerCalback;
+    protected ScannerCallback mScannerCallback;
 
     abstract class ScannerCallback {
         abstract void onScanResult(List<Pair<Long, List<Object>>> dataList);
     }
 
     protected Scanner(ScannerCallback scannerCallback) {
-        mScannerCalback = scannerCallback;
+        mScannerCallback = scannerCallback;
     }
 
     /**
