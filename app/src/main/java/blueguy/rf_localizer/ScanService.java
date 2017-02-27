@@ -35,6 +35,14 @@ public class ScanService extends Service {
     private static final String KEY_TIMESTAMP = "timestamp";
     private static final String VAL_UNKNOWN = "?";
 
+    public static HashMap<String, List<Object>> getDataBase() {
+        return mDataBase;
+    }
+
+    public static void setmDataBase(HashMap<String, List<Object>> mDataBase) {
+        ScanService.mDataBase = mDataBase;
+    }
+
     /**
      * This List contains all the active scanners being polled for data.
      */

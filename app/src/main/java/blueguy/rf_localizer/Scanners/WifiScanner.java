@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -70,10 +71,12 @@ public class WifiScanner extends Scanner {
 
     @Override
     protected boolean mStartScan() {
+        Log.d("WifiScanner", "starting scan");
         if (!isRegistered) {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             isRegistered = true;
+
         }
         return false;
     }
@@ -87,6 +90,18 @@ public class WifiScanner extends Scanner {
         }
         return false;
     }
+
+//    private Runnable requestScan = new Runnable() {
+//        @Override
+//        public void run() {
+//            Log.v("requestScan", "requesting");
+//            if(wM==null) wM = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+//            wM.startScan();
+//            final List<ScanResult> networks = wM.getScanResults();
+//            writeResults(networks);
+//            poller.postDelayed(requestScan, 100);
+//        }
+//    };
 
     /**
      * @param state
