@@ -1,7 +1,5 @@
 package blueguy.rf_localizer.Scanners;
 
-import android.util.Pair;
-
 import java.util.List;
 
 /**

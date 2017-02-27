@@ -74,10 +74,20 @@ public class ScanService extends Service {
      * IPC.
      */
     public class LocalBinder extends Binder {
-        ScanService getService() {
+        public ScanService getService() {
             return ScanService.this;
         }
     }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    // This is the object that receives interactions from clients.  See
+    // RemoteService for a more complete example.
+    private final IBinder mBinder = new LocalBinder();
+
 
     @Override
     public void onCreate() {
@@ -159,15 +169,4 @@ public class ScanService extends Service {
 
         return START_NOT_STICKY;
     }
-
-
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    // This is the object that receives interactions from clients.  See
-    // RemoteService for a more complete example.
-    private final IBinder mBinder = new LocalBinder();
 }
