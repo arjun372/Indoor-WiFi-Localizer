@@ -96,7 +96,7 @@ public class ScanService extends Service {
             Log.d("callback", dataList.toString());
 
             for (DataObject dataObject : dataList) {
-                // TODO: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
+                // TODO: Check: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
 
                 // First, push the timestamp on to the HashMap for this new data row
                 mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
@@ -117,24 +117,6 @@ public class ScanService extends Service {
                     mAddToDataBase(key, VAL_UNKNOWN);
                 }
             }
-
-//            List<String> allInfo = getCellTowerInfo();
-//            List<String> wifiInfo = getWifiAPInfo(networks);
-//            allInfo.addAll(wifiInfo);
-
-//            String testFolderName = "testingFolder";
-//
-//            try {
-//                final File targetFolder = new File(FS_rootDirectory+"/"+testFolderName);
-//                targetFolder.mkdirs();
-//                final FileWriter writer = new FileWriter(new File(targetFolder, "labeled.csv"), true);
-//
-//                writer.flush();
-//                writer.close();
-//
-//            }  catch (IOException e) {
-//                Log.e("writeResults", "Unable to write to file!");
-//            }
         }
     };
 

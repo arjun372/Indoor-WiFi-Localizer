@@ -26,8 +26,12 @@ public abstract class Scanner {
     }
 
     /**
+     * This function updateStaleEntries is used by subclasses of Scanner.java to check for stale entries.
+     * Pass the list of newly found data in toAdd to find the list of updated entries.
      *
-     * @return
+     * @param toAdd     Each element in this List is a Pair that of an Object (which can be
+     *                  any type returned by system services) and its timestamp (in a Long).
+     * @return          Returns a List of Pair objects that were successfully updated.
      */
     protected List<Object> updateStaleEntries(final List<Pair<Object, Long>> toAdd) {
         List<Object> updated = new ArrayList<>();
@@ -39,6 +43,7 @@ public abstract class Scanner {
             if(previousValue == null || (previousValue < singleItem.second))
             {
                 mStaleEntries.put(singleItem.first, singleItem.second);
+//                updated.add(singleItem);
                 updated.add(singleItem.first);
             }
         }
