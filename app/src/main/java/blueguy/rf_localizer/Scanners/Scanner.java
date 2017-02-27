@@ -19,7 +19,7 @@ public abstract class Scanner {
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
     protected ScannerCallback mScannerCallback;
 
-    private PowerManager.WakeLock powerLock;
+    private PowerManager.WakeLock mPowerLock;
 
     protected Scanner(ScannerCallback scannerCallback) {
         mScannerCallback = scannerCallback;
@@ -52,29 +52,30 @@ public abstract class Scanner {
 
 
     public void startScan() {
-        setWakeLock(true);
-        StartScan();
+        mSetWakeLock(true);
+        mStartScan();
     }
 
     public void stopScan() {
-        setWakeLock(false);
-        StopScan();
+        mSetWakeLock(false);
+        mStopScan();
     }
 
-    protected abstract boolean StartScan();
-    protected abstract boolean StopScan();
+    protected abstract boolean mStartScan();
+    protected abstract boolean mStopScan();
 
-    private void setWakeLock(final boolean state) {
+    private void mSetWakeLock(final boolean state) {
 
         final Context mContext = RF_Localizer_Application.getAppContext();
         final PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
-        if(powerLock == null) {
-            powerLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Scanner");
+        if(mPowerLock == null) {
+            // TODO: Look into depreciated PowerManager.FULL_WAKE_LOCK and possible replacement, if necessary
+            mPowerLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Scanner");
         }
 
-        if(state && !powerLock.isHeld()) powerLock.acquire();
-        if(!state && powerLock.isHeld()) powerLock.release();
+        if(state && !mPowerLock.isHeld()) mPowerLock.acquire();
+        if(!state && mPowerLock.isHeld()) mPowerLock.release();
     }
 }
 

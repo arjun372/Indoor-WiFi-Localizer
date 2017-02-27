@@ -10,12 +10,12 @@ class CellScanner extends Scanner {
     }
 
     @Override
-    public boolean StartScan() {
+    public boolean mStartScan() {
         return false;
     }
 
     @Override
-    public boolean StopScan() {
+    public boolean mStopScan() {
         return false;
     }
 }

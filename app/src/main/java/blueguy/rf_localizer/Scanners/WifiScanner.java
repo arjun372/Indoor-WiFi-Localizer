@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
@@ -33,10 +31,8 @@ public class WifiScanner extends Scanner {
             final Context mContext = RF_Localizer_Application.getAppContext();
             final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
             final List<ScanResult> networks = wifiManager.getScanResults();
-            //mScannerCallback.onScanResult();
 
             // TODO: Make sure this works
-
             // Make a List of DataObject objects from the WiFi getScanResults
             List<Pair<DataObject, Long>> networkDataObjects = new ArrayList<>();
             for (ScanResult network : networks) {
@@ -73,7 +69,7 @@ public class WifiScanner extends Scanner {
     }
 
     @Override
-    public boolean StartScan() {
+    protected boolean mStartScan() {
         if (!isRegistered) {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -83,7 +79,7 @@ public class WifiScanner extends Scanner {
     }
 
     @Override
-    public boolean StopScan() {
+    protected boolean mStopScan() {
         if (isRegistered) {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.unregisterReceiver(wifiScanReceiver);

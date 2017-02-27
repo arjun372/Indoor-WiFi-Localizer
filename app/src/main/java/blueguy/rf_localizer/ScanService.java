@@ -3,16 +3,11 @@ package blueguy.rf_localizer;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,15 +21,24 @@ import blueguy.rf_localizer.Scanners.WifiScanner;
 public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
-    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+//    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
-    // HashMap containing the data to write, whenever we want
-    // TODO: A new hash map needs to be created here for each new training/predicting environment
-    //          Ex. Boelter Hall vs Engineering 6, BUT not for each room in each building
-    //          Thus, this probably needs to be persistent somewhere.
+    /**
+     * HashMap containing the data to write, whenever we want to use it.
+     *
+     * TODO: A new hash map needs to be created here for each new training/predicting environment
+     *          Ex. Boelter Hall vs Engineering 6, BUT not for each room in each building
+     *          Thus, this probably needs to be persistent somewhere.
+     *
+     */
     private static HashMap<String, List<Object>> mDataBase = new HashMap<>();
     private static final String KEY_TIMESTAMP = "timestamp";
     private static final String VAL_UNKNOWN = "?";
+
+    /**
+     * This List contains all the active scanners being polled for data.
+     */
+    private static List<Scanner> mScannerList;
 
     /**
      * mAddToDataBase is a helper function that takes into account the structure of the HashMap,
@@ -64,7 +68,6 @@ public class ScanService extends Service {
         }
     }
 
-    private static List<Scanner> scannerList;
     /**
      * Class for clients to access.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with
@@ -78,14 +81,14 @@ public class ScanService extends Service {
 
     @Override
     public void onCreate() {
-        scannerList = initScanners();
+        mScannerList = mInitScanners();
     }
 
     @Override
     public void onDestroy() {
         Log.i(TAG, "Destroying scan service");
 
-        scannerList = removeScanners(scannerList);
+        mScannerList = mRemoveScanners(mScannerList);
 
         /** TODO : ensure scanned data gets dumped to file. **/
     }
@@ -93,6 +96,7 @@ public class ScanService extends Service {
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(List<DataObject> dataList) {
+            // TODO: Remove console logging
             Log.d("callback", dataList.toString());
 
             for (DataObject dataObject : dataList) {
@@ -120,7 +124,7 @@ public class ScanService extends Service {
         }
     };
 
-    private static List<Scanner> initScanners() {
+    private static List<Scanner> mInitScanners() {
 
         List<Scanner> curScanners = new ArrayList<>();
 
@@ -130,15 +134,17 @@ public class ScanService extends Service {
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
 //        curScanners.add(new RotationScanner(mScannerCallback));
 
-        for(Scanner single : curScanners) {
-            single.startScan();
+        for(Scanner scanner : curScanners) {
+            scanner.startScan();
         }
 
         return curScanners;
     }
 
-    private static List<Scanner> removeScanners(List<Scanner> currentScanners) {
-
+    private static List<Scanner> mRemoveScanners(List<Scanner> currentScanners) {
+        // TODO: Make sure this works
+        mScannerList.removeAll(currentScanners);
+        //
         return null;
     }
 
@@ -147,6 +153,9 @@ public class ScanService extends Service {
         Log.i(TAG, "Starting scan service : start id " + startId + ": " + intent);
 
         // TODO : run scanners here, permanently.
+//        for (Scanner scanner : mScannerList) {
+//            scanner.startScan();
+//        }
 
         return START_NOT_STICKY;
     }
