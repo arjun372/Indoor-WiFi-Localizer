@@ -62,11 +62,9 @@ public class WifiScanner extends Scanner {
         }
     };
 
-    /**
-     * @param scannerCallback
-     */
-    public WifiScanner(ScannerCallback scannerCallback) {
-        super(scannerCallback);
+
+    public WifiScanner(Context context, ScannerCallback scannerCallback) {
+        super(context, scannerCallback);
     }
 
     @Override

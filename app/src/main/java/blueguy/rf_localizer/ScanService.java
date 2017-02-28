@@ -142,11 +142,11 @@ public class ScanService extends Service {
         }
     };
 
-    private static List<Scanner> mInitScanners() {
+    private List<Scanner> mInitScanners() {
 
         List<Scanner> curScanners = new ArrayList<>();
 
-        curScanners.add(new WifiScanner(mScannerCallback));
+        curScanners.add(new WifiScanner(getApplicationContext(), mScannerCallback));
 //        curScanners.add(new CellScanner(mScannerCallback));
 //        curScanners.add(new VelocityScanner(mScannerCallback));
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
@@ -159,8 +159,18 @@ public class ScanService extends Service {
         return curScanners;
     }
 
-    private static List<Scanner> mRemoveScanners(List<Scanner> currentScanners) {
+    private List<Scanner> mRemoveScanners(List<Scanner> currentScanners) {
         // TODO: Make sure this works
+
+        // Stop scanning for each scanner and clear context to prevent memory leaks
+        for (Scanner scanner : currentScanners) {
+            // Stop scan
+            scanner.stopScan();
+
+            // Clear context
+            scanner.clearContext();
+        }
+
         mScannerList.removeAll(currentScanners);
         //
         return null;

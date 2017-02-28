@@ -19,10 +19,17 @@ public abstract class Scanner {
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
     protected ScannerCallback mScannerCallback;
 
+    protected Context mContext;
+
     private PowerManager.WakeLock mPowerLock;
 
-    protected Scanner(ScannerCallback scannerCallback) {
+    protected Scanner(Context context, ScannerCallback scannerCallback) {
+        mContext = context;
         mScannerCallback = scannerCallback;
+    }
+
+    public final void clearContext() {
+        mContext = null;
     }
 
     /**
@@ -51,12 +58,12 @@ public abstract class Scanner {
     }
 
 
-    public void startScan() {
+    public final void startScan() {
         mSetWakeLock(true);
         mStartScan();
     }
 
-    public void stopScan() {
+    public final void stopScan() {
         mSetWakeLock(false);
         mStopScan();
     }
@@ -64,7 +71,7 @@ public abstract class Scanner {
     protected abstract boolean mStartScan();
     protected abstract boolean mStopScan();
 
-    private void mSetWakeLock(final boolean state) {
+    private final void mSetWakeLock(final boolean state) {
 
         final Context mContext = RF_Localizer_Application.getAppContext();
         final PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
