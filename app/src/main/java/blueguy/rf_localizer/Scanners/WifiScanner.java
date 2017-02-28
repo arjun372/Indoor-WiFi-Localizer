@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 
@@ -20,18 +21,28 @@ import blueguy.rf_localizer.RF_Localizer_Application;
  */
 public class WifiScanner extends Scanner {
 
+    public static final String TAG = "WifiScanner";
+
     public static final String KEY_WIFI_RSSI = "rssi";
 
     private WifiManager.WifiLock wifiLock;
+    private WifiManager mWifiManager;
+
+    private Handler mHandler = new Handler();
 
     private boolean isRegistered = false;
 
     private BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final Context mContext = RF_Localizer_Application.getAppContext();
-            final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+
+            Log.d(TAG, "Reached wifiScanReceiver");
+
+            final Context localContext = RF_Localizer_Application.getAppContext();
+            final WifiManager wifiManager = (WifiManager) localContext.getSystemService(Context.WIFI_SERVICE);
             final List<ScanResult> networks = wifiManager.getScanResults();
+
+            Log.d(TAG, "wifiScanReceiver getScanResults: " + networks.toString());
 
             // TODO: Make sure this works
             // Make a List of DataObject objects from the WiFi getScanResults
@@ -55,6 +66,8 @@ public class WifiScanner extends Scanner {
             // NOTE: Doing a lot of unchecked casting here
             List<DataObject> updatedEntries = (List<DataObject>) (List<?>) updateStaleEntries((List<Pair<Object, Long>>) (List<?>) networkDataObjects);
 
+            Log.d(TAG, "wifiScanReceiver updatedEntries: " + updatedEntries.toString());
+
             // Now send updated data to scanner callback for processing
             mScannerCallback.onScanResult(updatedEntries);
 
@@ -63,8 +76,8 @@ public class WifiScanner extends Scanner {
     };
 
 
-    public WifiScanner(Context context, ScannerCallback scannerCallback) {
-        super(context, scannerCallback);
+    public WifiScanner(ScannerCallback scannerCallback) {
+        super(scannerCallback);
     }
 
     @Override
@@ -74,7 +87,7 @@ public class WifiScanner extends Scanner {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             isRegistered = true;
-
+            mHandler.post(requestScan);
         }
         return false;
     }
@@ -85,21 +98,26 @@ public class WifiScanner extends Scanner {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.unregisterReceiver(wifiScanReceiver);
             isRegistered = false;
+            mHandler.removeCallbacks(requestScan);
         }
         return false;
     }
 
-//    private Runnable requestScan = new Runnable() {
-//        @Override
-//        public void run() {
-//            Log.v("requestScan", "requesting");
-//            if(wM==null) wM = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-//            wM.startScan();
-//            final List<ScanResult> networks = wM.getScanResults();
+    private Runnable requestScan = new Runnable() {
+        @Override
+        public void run() {
+            Log.v("requestScan", "requesting");
+            if(mWifiManager==null) {
+                mWifiManager = (WifiManager) RF_Localizer_Application.getAppContext().getSystemService(Context.WIFI_SERVICE);
+            }
+            mWifiManager.startScan();
+
+            final List<ScanResult> networks = mWifiManager.getScanResults();
+            Log.d(TAG, "Got scan results in runnable: " + networks.toString());
 //            writeResults(networks);
-//            poller.postDelayed(requestScan, 100);
-//        }
-//    };
+            mHandler.postDelayed(requestScan, 100);
+        }
+    };
 
     /**
      * @param state

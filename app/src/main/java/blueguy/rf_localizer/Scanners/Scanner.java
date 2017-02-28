@@ -19,17 +19,10 @@ public abstract class Scanner {
     private HashMap<Object, Long> mStaleEntries = new HashMap<>();
     protected ScannerCallback mScannerCallback;
 
-    protected Context mContext;
-
     private PowerManager.WakeLock mPowerLock;
 
-    protected Scanner(Context context, ScannerCallback scannerCallback) {
-        mContext = context;
+    protected Scanner(ScannerCallback scannerCallback) {
         mScannerCallback = scannerCallback;
-    }
-
-    public final void clearContext() {
-        mContext = null;
     }
 
     /**
@@ -50,7 +43,6 @@ public abstract class Scanner {
             if(previousValue == null || (previousValue < singleItem.second))
             {
                 mStaleEntries.put(singleItem.first, singleItem.second);
-//                updated.add(singleItem);
                 updated.add(singleItem.first);
             }
         }

@@ -10,6 +10,7 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,16 +32,12 @@ public class ScanService extends Service {
      *          Thus, this probably needs to be persistent somewhere.
      *
      */
-    private static HashMap<String, List<Object>> mDataBase = new HashMap<>();
+    private static HashMap<String, List<Object>> mDataBase;// = new HashMap<>();
     private static final String KEY_TIMESTAMP = "timestamp";
     private static final String VAL_UNKNOWN = "?";
 
     public static HashMap<String, List<Object>> getDataBase() {
         return mDataBase;
-    }
-
-    public static void setmDataBase(HashMap<String, List<Object>> mDataBase) {
-        ScanService.mDataBase = mDataBase;
     }
 
     /**
@@ -60,7 +57,7 @@ public class ScanService extends Service {
      * @param key       The String denoting the key to be used when putting into the mDataBase.
      * @param value     The Object value to put into the mDataBase with given key.
      */
-    private static void mAddToDataBase(String key, Object value) {
+    private static synchronized void mAddToDataBase(String key, Object value) {
         // If the mDataBase is null, create a new empty one for it
         if (mDataBase == null) {
             mDataBase = new HashMap<>();
@@ -114,29 +111,32 @@ public class ScanService extends Service {
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(List<DataObject> dataList) {
-            // TODO: Remove console logging
-            Log.d("callback", dataList.toString());
 
             for (DataObject dataObject : dataList) {
                 // TODO: Check: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
 
-                // First, push the timestamp on to the HashMap for this new data row
-                mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
-
                 // Start keeping track of feature names that were updated so the rest can be filled with unknowns
-                Set<String> unUpdatedKeys = mDataBase.keySet();
+                Set<String> unUpdatedKeys = (mDataBase == null) ? (new HashSet<String>()) : (new HashSet<>(mDataBase.keySet()));
+
+                // First, push the timestamp on to the HashMap for this new data row
+                ScanService.mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
+                unUpdatedKeys.remove(KEY_TIMESTAMP);
+
+
+                Log.d("callback", dataObject.mDataVals.toString());
 
                 // Add each data value to the mDataBase HashMap
                 for (Pair<String, Object> dataPair : dataObject.mDataVals) {
-                    mAddToDataBase(dataObject.mID + dataPair.first, dataPair.second);
+
+                    ScanService.mAddToDataBase(dataObject.mID + "_" + dataPair.first, dataPair.second);
 
                     // Remove this feature name from unUpdatedKeys
-                    unUpdatedKeys.remove(dataObject.mID + dataPair.first);
+                    unUpdatedKeys.remove(dataObject.mID + "_" + dataPair.first);
                 }
 
                 // For each unUpdatedKey, fill in with unknown value, '?'
                 for (String key : unUpdatedKeys) {
-                    mAddToDataBase(key, VAL_UNKNOWN);
+                    ScanService.mAddToDataBase(key, VAL_UNKNOWN);
                 }
             }
         }
@@ -146,7 +146,7 @@ public class ScanService extends Service {
 
         List<Scanner> curScanners = new ArrayList<>();
 
-        curScanners.add(new WifiScanner(getApplicationContext(), mScannerCallback));
+        curScanners.add(new WifiScanner(mScannerCallback));
 //        curScanners.add(new CellScanner(mScannerCallback));
 //        curScanners.add(new VelocityScanner(mScannerCallback));
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
@@ -168,7 +168,7 @@ public class ScanService extends Service {
             scanner.stopScan();
 
             // Clear context
-            scanner.clearContext();
+//            scanner.clearContext();
         }
 
         mScannerList.removeAll(currentScanners);
