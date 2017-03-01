@@ -14,10 +14,53 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <ListView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/ListView_data"
         android:layout_below="@+id/main_toolbar"
-        android:layout_alignParentEnd="true" />
+        android:layout_centerHorizontal="true"
+        >
+
+        <TextView
+            android:text="@string/app_name"
+            android:layout_width="match_parent"
+            android:layout_weight="3"
+            android:layout_height="0dp"
+            android:id="@+id/main_title_textview"
+            android:gravity="center_horizontal"
+            android:textSize="30sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="0dp"
+            />
+
+        <Button
+            android:text="Train"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/main_button_train" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5" />
+
+        <Button
+            android:text="Predict"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/main_button_predict" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+
+    </LinearLayout>
+
+
 </RelativeLayout>
