@@ -1,14 +1,14 @@
 package blueguy.rf_localizer;
 
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Get Toolbar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(mToolbar);
+        setActionBar(mToolbar);
 
         // Set up buttons
         Button trainButton = (Button) findViewById(R.id.main_button_train);
@@ -43,13 +43,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private void mShowTrainingPicker() {
-        new AlertDialog.Builder(getApplicationContext())
+        new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Which building/location are you in?")
                 .show();
     }
-
 
     private void mShowPredictingPicker() {
 
