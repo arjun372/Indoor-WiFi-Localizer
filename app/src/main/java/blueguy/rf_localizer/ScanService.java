@@ -6,6 +6,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,6 +98,7 @@ public class ScanService extends Service {
     @Override
     public void onCreate() {
         mScannerList = mInitScanners();
+        Toast.makeText(this, "Scan Service started", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -104,7 +106,7 @@ public class ScanService extends Service {
         Log.i(TAG, "Destroying scan service");
 
         mScannerList = mRemoveScanners(mScannerList);
-
+        Toast.makeText(this, "Scan Service stopped", Toast.LENGTH_SHORT).show();
         /** TODO : ensure scanned data gets dumped to file. **/
     }
 
@@ -181,9 +183,9 @@ public class ScanService extends Service {
         Log.i(TAG, "Starting scan service : start id " + startId + ": " + intent);
 
         // TODO : run scanners here, permanently.
-//        for (Scanner scanner : mScannerList) {
-//            scanner.startScan();
-//        }
+        for (Scanner scanner : mScannerList) {
+            scanner.startScan();
+        }
 
         return START_NOT_STICKY;
     }

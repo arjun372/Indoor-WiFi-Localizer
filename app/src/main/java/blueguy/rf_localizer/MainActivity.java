@@ -1,6 +1,7 @@
 package blueguy.rf_localizer;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +13,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //TODO : Start scan service here
+        final Intent startServiceIntent = new Intent(this, ScanService.class);
+        startService(startServiceIntent);
+
         super.onCreate(savedInstanceState);
 
         // Set Layout
@@ -41,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
                 mShowPredictingPicker();
             }
         });
+
+
     }
 
     private void mShowTrainingPicker() {
