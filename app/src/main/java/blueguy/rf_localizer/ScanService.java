@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import blueguy.rf_localizer.Scanners.BluetoothScanner;
 import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
@@ -154,6 +155,7 @@ public class ScanService extends Service {
 
         curScanners.add(new WifiScanner(mScannerCallback));
         curScanners.add(new CellScanner(mScannerCallback));
+        curScanners.add(new BluetoothScanner(mScannerCallback));
 //        curScanners.add(new VelocityScanner(mScannerCallback));
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
 //        curScanners.add(new RotationScanner(mScannerCallback));

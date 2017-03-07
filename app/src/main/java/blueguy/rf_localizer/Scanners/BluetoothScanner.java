@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class BluetoothScanner extends Scanner {
 
-    protected BluetoothScanner(ScannerCallback scannerCallback) {
+    public BluetoothScanner(ScannerCallback scannerCallback) {
         super(scannerCallback);
     }
 
