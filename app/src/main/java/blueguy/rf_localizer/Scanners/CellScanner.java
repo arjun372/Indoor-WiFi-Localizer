@@ -11,6 +11,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,10 +81,12 @@ public class CellScanner extends Scanner {
         TelephonyManager tel = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         /** Poll the current API now **/
-        final List neighCells = tel.getAllCellInfo();
+        List tempCells = tel.getAllCellInfo();
+        final List neighCells = (tempCells == null) ? new ArrayList() : tempCells;
 
         /** Poll the deprecated API first, timestamp values are uncertain **/
-        final List<?> neighboringCellInfos = tel.getNeighboringCellInfo();
+        List tempNeighCells = tel.getNeighboringCellInfo();
+        final List<?> neighboringCellInfos = (tempNeighCells == null) ? new ArrayList<>() : tempNeighCells;
 
         neighCells.addAll(neighboringCellInfos);
 
