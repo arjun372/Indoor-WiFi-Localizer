@@ -43,10 +43,10 @@ public abstract class Scanner {
 
         List<DataObject> updated = new ArrayList<>();
 
-        for(final DataObject newItem : toAdd) {
+        for(DataObject newItem : toAdd) {
 
             final Object key = newItem.mID;
-            final Long currentTime  = newItem.mTimeStamp;
+            final Long currentTime  = newItem.mTimeStamp + RF_Localizer_Application.timeOfBoot;
             final Long previousTime = mStaleEntries.get(key);
 
             if(previousTime == null || (previousTime < currentTime))
@@ -55,6 +55,7 @@ public abstract class Scanner {
                 if(index == null || !index.equals(currentTime))
                 {
                     if(DEBUG) Log.d(TAG, currentTime + " @ "+key + " -> " + newItem.mDataVals.toString());
+                    newItem.mTimeStamp = currentTime;
                     updated.add(newItem);
                 }
             }

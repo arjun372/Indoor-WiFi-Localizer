@@ -1,17 +1,13 @@
 package blueguy.rf_localizer.Scanners;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
+import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
@@ -27,10 +23,9 @@ import blueguy.rf_localizer.RF_Localizer_Application;
  */
 public class CellScanner extends Scanner {
 
-    private static final long pollingInterval = 500;
+    private static final long pollingInterval = 1000;
 
     private static final String TAG = "CellScanner";
-    private static final String KEY_CELL_RSSI = "cell_rssi";
 
     private Handler mHandler = new Handler();
 
@@ -83,41 +78,116 @@ public class CellScanner extends Scanner {
 
         final Context context = RF_Localizer_Application.getAppContext();
         TelephonyManager tel = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        final List<CellInfo> neighCells = tel.getAllCellInfo();
 
-        for(final CellInfo singleCellInfo : neighCells) {
+        /** Poll the current API now **/
+        final List neighCells = tel.getAllCellInfo();
 
-            final long timestamp = (singleCellInfo.getTimeStamp() / 1000000);
-            final int identity;
-            final int rssi;
+        /** Poll the deprecated API first, timestamp values are uncertain **/
+        final List<?> neighboringCellInfos = tel.getNeighboringCellInfo();
 
-            if(singleCellInfo instanceof CellInfoWcdma) {
-                CellInfoWcdma info = (CellInfoWcdma) singleCellInfo;
-                identity = info.getCellIdentity().getCid();
-                rssi = info.getCellSignalStrength().getDbm();
+        neighCells.addAll(neighboringCellInfos);
+
+        for(Object singleCellInfo :neighCells) {
+
+            long timestamp = System.currentTimeMillis() - RF_Localizer_Application.timeOfBoot;
+            String identity = "cell_tower";
+
+            int dbm = Integer.MIN_VALUE;
+            int lvl  = Integer.MIN_VALUE;
+            int asu_lvl = Integer.MIN_VALUE;
+
+            int cdma_dbm  = Integer.MIN_VALUE;
+            int cdma_lvl  = Integer.MIN_VALUE;
+            int cdma_ecio = Integer.MIN_VALUE;
+
+            int evdo_dbm  = Integer.MIN_VALUE;
+            int evdo_lvl  = Integer.MIN_VALUE;
+            int evdo_ecio = Integer.MIN_VALUE;
+            int evdo_snr  = Integer.MIN_VALUE;
+
+            int timing_advance = Integer.MIN_VALUE;
+
+            if (singleCellInfo instanceof NeighboringCellInfo)
+            {
+                final NeighboringCellInfo info = (NeighboringCellInfo) singleCellInfo;
+                identity = String.valueOf(info.getCid());
+                asu_lvl = info.getRssi();
+                dbm = -113 + (2*asu_lvl);
             }
 
-            else if (singleCellInfo instanceof CellInfoCdma) {
+            if(singleCellInfo instanceof CellInfoWcdma)
+            {
+                final CellInfoWcdma info = (CellInfoWcdma) singleCellInfo;
+                timestamp = (info.getTimeStamp() / 1000000);
+                identity = info.getCellIdentity().toString();
+
+                dbm = info.getCellSignalStrength().getDbm();
+                lvl = info.getCellSignalStrength().getLevel();
+                asu_lvl = info.getCellSignalStrength().getAsuLevel();
+            }
+
+            if (singleCellInfo instanceof CellInfoCdma)
+            {
                 CellInfoCdma info = (CellInfoCdma) singleCellInfo;
-                identity  = info.getCellIdentity().getNetworkId();
-                rssi      = info.getCellSignalStrength().getDbm();
+                timestamp = (info.getTimeStamp() / 1000000);
+                identity = info.getCellIdentity().toString();
+
+                dbm = info.getCellSignalStrength().getDbm();
+                lvl = info.getCellSignalStrength().getLevel();
+                asu_lvl = info.getCellSignalStrength().getAsuLevel();
+
+                cdma_dbm = info.getCellSignalStrength().getCdmaDbm();
+                cdma_lvl = info.getCellSignalStrength().getCdmaLevel();
+                cdma_ecio = info.getCellSignalStrength().getCdmaEcio();
+
+                evdo_dbm = info.getCellSignalStrength().getEvdoDbm();
+                evdo_lvl = info.getCellSignalStrength().getEvdoLevel();
+                evdo_snr = info.getCellSignalStrength().getEvdoSnr();
+                evdo_ecio = info.getCellSignalStrength().getEvdoEcio();
             }
 
-            else if (singleCellInfo instanceof CellInfoLte) {
+            if (singleCellInfo instanceof CellInfoLte)
+            {
                 CellInfoLte info = (CellInfoLte) singleCellInfo;
-                identity  = info.getCellIdentity().getCi();
-                rssi      = info.getCellSignalStrength().getDbm();
+                timestamp = (info.getTimeStamp() / 1000000);
+                identity = info.getCellIdentity().toString();
+
+                dbm = info.getCellSignalStrength().getDbm();
+                lvl = info.getCellSignalStrength().getLevel();
+                asu_lvl = info.getCellSignalStrength().getAsuLevel();
+
+                timing_advance = info.getCellSignalStrength().getTimingAdvance();
             }
 
-            else {
+            if (singleCellInfo instanceof CellInfoGsm)
+            {
                 CellInfoGsm info = (CellInfoGsm) singleCellInfo;
-                identity  = info.getCellIdentity().getCid();
-                rssi      = info.getCellSignalStrength().getDbm();
+                timestamp = (info.getTimeStamp() / 1000000);
+                identity = info.getCellIdentity().toString();
+
+                dbm = info.getCellSignalStrength().getDbm();
+                lvl = info.getCellSignalStrength().getLevel();
+                asu_lvl = info.getCellSignalStrength().getAsuLevel();
             }
 
-            final Pair<String, Object> dataVals = new Pair<String, Object>(KEY_CELL_RSSI, rssi);
-            final List<Pair<String, Object>> networkDataVals = new ArrayList<>(Collections.singletonList(dataVals));
-            final DataObject newCellTower = new DataObject(timestamp, String.valueOf(identity), networkDataVals);
+            List<Pair<String, Object>> dataVector = new ArrayList<>();
+
+            dataVector.add(new Pair<String, Object>("dbm", dbm));
+            dataVector.add(new Pair<String, Object>("asu_lvl", asu_lvl));
+            dataVector.add(new Pair<String, Object>("lvl", lvl));
+
+            dataVector.add(new Pair<String, Object>("cdma_dbm", cdma_dbm));
+            dataVector.add(new Pair<String, Object>("cdma_lvl", cdma_lvl));
+            dataVector.add(new Pair<String, Object>("cdma_ecio", cdma_ecio));
+
+            dataVector.add(new Pair<String, Object>("evdo_dbm", evdo_dbm));
+            dataVector.add(new Pair<String, Object>("evdo_lvl", evdo_lvl));
+            dataVector.add(new Pair<String, Object>("evdo_ecio", evdo_ecio));
+            dataVector.add(new Pair<String, Object>("evdo_snr", evdo_snr));
+
+            dataVector.add(new Pair<String, Object>("timing_adv", timing_advance));
+
+            final DataObject newCellTower = new DataObject(timestamp, identity, dataVector);
             newCellTowers.add(newCellTower);
         }
 

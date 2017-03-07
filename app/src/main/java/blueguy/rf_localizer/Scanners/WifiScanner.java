@@ -26,8 +26,6 @@ public class WifiScanner extends Scanner {
     private static final long pollingInterval = 500;
 
     private static final String TAG = "WifiScanner";
-    private static final String KEY_WIFI_RSSI = "rssi";
-
     private WifiManager.WifiLock wifiLock;
 
     private Handler mHandler = new Handler();
@@ -57,8 +55,25 @@ public class WifiScanner extends Scanner {
         for (final ScanResult network : networks)
         {
             final long timestampFound = network.timestamp/1000;
-            final Pair<String, Object> dataVals = new Pair<String, Object>(KEY_WIFI_RSSI, network.level);
-            final List<Pair<String, Object>> networkDataVals = new ArrayList<>(Collections.singletonList(dataVals));
+
+            final int dbm  = network.level;
+            final int freq = network.frequency;
+            final int centerFreq0 = network.centerFreq0;
+            final int centerFreq1 = network.centerFreq1;
+            final int channel_width = network.channelWidth;
+            final int mimo = network.is80211mcResponder() ? 1 : 0;
+            final int passpoint = network.isPasspointNetwork() ? 1 : 0;
+
+            List<Pair<String, Object>> networkDataVals = new ArrayList<>();
+
+            networkDataVals.add(new Pair<String, Object>("dbm", dbm));
+            networkDataVals.add(new Pair<String, Object>("freq", freq));
+            networkDataVals.add(new Pair<String, Object>("mimo", mimo));
+            networkDataVals.add(new Pair<String, Object>("channel_width", channel_width));
+            networkDataVals.add(new Pair<String, Object>("passpoint", passpoint));
+            networkDataVals.add(new Pair<String, Object>("center_freq0", centerFreq0));
+            networkDataVals.add(new Pair<String, Object>("center_freq1", centerFreq1));
+
             final DataObject newNetwork = new DataObject(timestampFound, network.BSSID, networkDataVals);
             networkDataObjects.add(newNetwork);
         }
