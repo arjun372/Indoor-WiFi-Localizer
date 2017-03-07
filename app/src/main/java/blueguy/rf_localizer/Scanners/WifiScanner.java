@@ -21,73 +21,66 @@ import blueguy.rf_localizer.RF_Localizer_Application;
  */
 public class WifiScanner extends Scanner {
 
-    public static final String TAG = "WifiScanner";
+    private static final long pollingInterval = 500;
 
-    public static final String KEY_WIFI_RSSI = "rssi";
+    private static final String TAG = "WifiScanner";
+    private static final String KEY_WIFI_RSSI = "rssi";
 
     private WifiManager.WifiLock wifiLock;
-    private WifiManager mWifiManager;
 
     private Handler mHandler = new Handler();
 
     private boolean isRegistered = false;
 
-    private BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            Log.d(TAG, "Reached wifiScanReceiver");
-
-            final Context localContext = RF_Localizer_Application.getAppContext();
-            final WifiManager wifiManager = (WifiManager) localContext.getSystemService(Context.WIFI_SERVICE);
-            final List<ScanResult> networks = wifiManager.getScanResults();
-
-            Log.d(TAG, "wifiScanReceiver getScanResults: " + networks.toString());
-
-            // TODO: Make sure this works
-            // Make a List of DataObject objects from the WiFi getScanResults
-            List<Pair<DataObject, Long>> networkDataObjects = new ArrayList<>();
-            for (ScanResult network : networks) {
-                networkDataObjects.add(
-                        new Pair<>(
-                                new DataObject(
-                                        network.timestamp,
-                                        network.BSSID,
-                                        new ArrayList<>(
-                                                Arrays.asList(new Pair<String, Object>(KEY_WIFI_RSSI, network.level))
-                                        )
-                                ),
-                                network.timestamp
-                        )
-                );
-            }
-
-            // Try to update the stale entries, and get updated list to send to scan callback
-            // NOTE: Doing a lot of unchecked casting here
-            List<DataObject> updatedEntries = (List<DataObject>) (List<?>) updateStaleEntries((List<Pair<Object, Long>>) (List<?>) networkDataObjects);
-
-            Log.d(TAG, "wifiScanReceiver updatedEntries: " + updatedEntries.toString());
-
-            // Now send updated data to scanner callback for processing
-            mScannerCallback.onScanResult(updatedEntries);
-
-            //
-        }
-    };
-
-
     public WifiScanner(ScannerCallback scannerCallback) {
         super(scannerCallback);
     }
 
+    private BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            /** Get scan results, update entries, and fire callback **/
+            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final List<ScanResult> networks = wifiManager.getScanResults();
+            final List<DataObject> updatedEntries = updateEntries(networks);
+            mScannerCallback.onScanResult(updatedEntries);
+        }
+    };
+
+    private List<DataObject> updateEntries(final List<ScanResult> networks) {
+        // TODO: Make sure this works
+        // Make a List of DataObject objects from the WiFi getScanResults
+        List<Pair<DataObject, Long>> networkDataObjects = new ArrayList<>();
+        for (ScanResult network : networks) {
+            networkDataObjects.add(
+                    new Pair<>(
+                            new DataObject(
+                                    network.timestamp,
+                                    network.BSSID,
+                                    new ArrayList<>(
+                                            Arrays.asList(new Pair<String, Object>(KEY_WIFI_RSSI, network.level))
+                                    )
+                            ),
+                            network.timestamp
+                    )
+            );
+        }
+        // Try to update the stale entries, and get updated list to send to scan callback
+        // NOTE: Doing a lot of unchecked casting here
+
+        List<DataObject> updatedEntries = (List<DataObject>) (List<?>) updateStaleEntries((List<Pair<Object, Long>>) (List<?>) networkDataObjects);
+        return updatedEntries;
+    }
+
     @Override
     protected boolean mStartScan() {
-        Log.d("WifiScanner", "starting scan");
         if (!isRegistered) {
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             isRegistered = true;
             mHandler.post(requestScan);
+            Log.d(TAG, "started scan handler");
         }
         return false;
     }
@@ -99,6 +92,7 @@ public class WifiScanner extends Scanner {
             mContext.unregisterReceiver(wifiScanReceiver);
             isRegistered = false;
             mHandler.removeCallbacks(requestScan);
+            Log.d(TAG, "stopped scan handler");
         }
         return false;
     }
@@ -106,16 +100,19 @@ public class WifiScanner extends Scanner {
     private Runnable requestScan = new Runnable() {
         @Override
         public void run() {
-            Log.v("requestScan", "requesting");
-            if(mWifiManager==null) {
-                mWifiManager = (WifiManager) RF_Localizer_Application.getAppContext().getSystemService(Context.WIFI_SERVICE);
-            }
-            mWifiManager.startScan();
 
-            final List<ScanResult> networks = mWifiManager.getScanResults();
-            Log.d(TAG, "Got scan results in runnable: " + networks.toString());
-//            writeResults(networks);
-            mHandler.postDelayed(requestScan, 100);
+            /** Get scan results, update entries, and fire callback **/
+            final Context context = RF_Localizer_Application.getAppContext();
+            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final List<ScanResult> networks = wifiManager.getScanResults();
+            final List<DataObject> updatedEntries = updateEntries(networks);
+            mScannerCallback.onScanResult(updatedEntries);
+
+            /** Send intent to start scan again **/
+            wifiManager.startScan();
+
+            /** poll again in the given interval **/
+            mHandler.postDelayed(requestScan, pollingInterval);
         }
     };
 

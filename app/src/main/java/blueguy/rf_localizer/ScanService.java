@@ -23,6 +23,7 @@ import blueguy.rf_localizer.Scanners.WifiScanner;
 public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
+    private static final String CALLBACK = "ScanCallback";
 //    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
     /**
@@ -97,16 +98,18 @@ public class ScanService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate");
+        Toast.makeText(this, "onCreate: scanService", Toast.LENGTH_SHORT).show();
         mScannerList = mInitScanners();
-        Toast.makeText(this, "Scan Service started", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "Destroying scan service");
+        Log.d(TAG, "onDestroy");
 
         mScannerList = mRemoveScanners(mScannerList);
-        Toast.makeText(this, "Scan Service stopped", Toast.LENGTH_SHORT).show();
+
+        Toast.makeText(this, "onDestroy: scanService", Toast.LENGTH_SHORT).show();
         /** TODO : ensure scanned data gets dumped to file. **/
     }
 
@@ -124,8 +127,7 @@ public class ScanService extends Service {
                 ScanService.mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
                 unUpdatedKeys.remove(KEY_TIMESTAMP);
 
-
-                Log.d("callback", dataObject.mDataVals.toString());
+                Log.d(CALLBACK, dataObject.mDataVals.toString());
 
                 // Add each data value to the mDataBase HashMap
                 for (Pair<String, Object> dataPair : dataObject.mDataVals) {
@@ -145,7 +147,7 @@ public class ScanService extends Service {
     };
 
     private List<Scanner> mInitScanners() {
-
+        Log.d(TAG, "initScanners");
         List<Scanner> curScanners = new ArrayList<>();
 
         curScanners.add(new WifiScanner(mScannerCallback));
@@ -162,25 +164,22 @@ public class ScanService extends Service {
     }
 
     private List<Scanner> mRemoveScanners(List<Scanner> currentScanners) {
+        Log.d(TAG, "removeScanners");
         // TODO: Make sure this works
 
         // Stop scanning for each scanner and clear context to prevent memory leaks
         for (Scanner scanner : currentScanners) {
             // Stop scan
             scanner.stopScan();
-
-            // Clear context
-//            scanner.clearContext();
         }
 
         mScannerList.removeAll(currentScanners);
-        //
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Starting scan service : start id " + startId + ": " + intent);
+        Log.d(TAG, "onStart: " + startId + ":" + intent);
 
         // TODO : run scanners here, permanently.
         for (Scanner scanner : mScannerList) {
