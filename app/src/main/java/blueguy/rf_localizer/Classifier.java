@@ -1,4 +1,4 @@
-package blueguy.rf_localizer.Scanners;
+package blueguy.rf_localizer;
 
 import weka.*;
 

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
@@ -115,9 +116,10 @@ public class ScanService extends Service {
 
     private static ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
-        public void onScanResult(List<DataObject> dataList) {
+        public void onScanResult(final List<DataObject> dataList) {
 
-            for (DataObject dataObject : dataList) {
+            for (final DataObject dataObject : dataList) {
+
                 // TODO: Check: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
 
                 // Start keeping track of feature names that were updated so the rest can be filled with unknowns
@@ -127,10 +129,10 @@ public class ScanService extends Service {
                 ScanService.mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
                 unUpdatedKeys.remove(KEY_TIMESTAMP);
 
-                Log.d(CALLBACK, dataObject.mDataVals.toString());
+               // Log.d(CALLBACK, dataObject.mDataVals.toString());
 
                 // Add each data value to the mDataBase HashMap
-                for (Pair<String, Object> dataPair : dataObject.mDataVals) {
+                for (final Pair<String, Object> dataPair : dataObject.mDataVals) {
 
                     ScanService.mAddToDataBase(dataObject.mID + "_" + dataPair.first, dataPair.second);
 
@@ -151,7 +153,7 @@ public class ScanService extends Service {
         List<Scanner> curScanners = new ArrayList<>();
 
         curScanners.add(new WifiScanner(mScannerCallback));
-//        curScanners.add(new CellScanner(mScannerCallback));
+        curScanners.add(new CellScanner(mScannerCallback));
 //        curScanners.add(new VelocityScanner(mScannerCallback));
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
 //        curScanners.add(new RotationScanner(mScannerCallback));

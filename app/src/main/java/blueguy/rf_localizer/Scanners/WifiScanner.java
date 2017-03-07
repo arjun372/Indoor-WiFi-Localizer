@@ -12,6 +12,8 @@ import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
@@ -49,33 +51,25 @@ public class WifiScanner extends Scanner {
     };
 
     private List<DataObject> updateEntries(final List<ScanResult> networks) {
-        // TODO: Make sure this works
-        // Make a List of DataObject objects from the WiFi getScanResults
-        List<Pair<DataObject, Long>> networkDataObjects = new ArrayList<>();
-        for (ScanResult network : networks) {
-            networkDataObjects.add(
-                    new Pair<>(
-                            new DataObject(
-                                    network.timestamp,
-                                    network.BSSID,
-                                    new ArrayList<>(
-                                            Arrays.asList(new Pair<String, Object>(KEY_WIFI_RSSI, network.level))
-                                    )
-                            ),
-                            network.timestamp
-                    )
-            );
-        }
-        // Try to update the stale entries, and get updated list to send to scan callback
-        // NOTE: Doing a lot of unchecked casting here
 
-        List<DataObject> updatedEntries = (List<DataObject>) (List<?>) updateStaleEntries((List<Pair<Object, Long>>) (List<?>) networkDataObjects);
-        return updatedEntries;
+        /** Make a List of DataObject objects from the WiFi getScanResults **/
+        List<DataObject> networkDataObjects = new ArrayList<>();
+        for (final ScanResult network : networks)
+        {
+            final long timestampFound = network.timestamp/1000;
+            final Pair<String, Object> dataVals = new Pair<String, Object>(KEY_WIFI_RSSI, network.level);
+            final List<Pair<String, Object>> networkDataVals = new ArrayList<>(Collections.singletonList(dataVals));
+            final DataObject newNetwork = new DataObject(timestampFound, network.BSSID, networkDataVals);
+            networkDataObjects.add(newNetwork);
+        }
+
+        return updateStaleEntries(networkDataObjects);
     }
 
     @Override
     protected boolean mStartScan() {
         if (!isRegistered) {
+            setWifiLock(true);
             final Context mContext = RF_Localizer_Application.getAppContext();
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             isRegistered = true;
@@ -92,6 +86,7 @@ public class WifiScanner extends Scanner {
             mContext.unregisterReceiver(wifiScanReceiver);
             isRegistered = false;
             mHandler.removeCallbacks(requestScan);
+            setWifiLock(false);
             Log.d(TAG, "stopped scan handler");
         }
         return false;
@@ -125,7 +120,7 @@ public class WifiScanner extends Scanner {
         final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
         if (wifiLock == null) {
-            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "WifiScanner");
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
         }
 
         if (state && !wifiLock.isHeld()) wifiLock.acquire();
