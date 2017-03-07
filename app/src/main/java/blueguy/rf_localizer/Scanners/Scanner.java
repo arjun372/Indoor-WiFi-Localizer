@@ -36,14 +36,16 @@ public abstract class Scanner {
     protected List<Object> updateStaleEntries(final List<Pair<Object, Long>> toAdd) {
         List<Object> updated = new ArrayList<>();
 
-        for(Pair<Object, Long> singleItem : toAdd) {
+        for(Pair<Object, Long> newItem : toAdd) {
+            Object newItemKey = newItem.first;
+            Long newItemTime = newItem.second;
 
-            Long previousValue = mStaleEntries.get(singleItem.first);
+            Long previousTime = mStaleEntries.get(newItemKey);
 
-            if(previousValue == null || (previousValue < singleItem.second))
+            if(previousTime == null || (previousTime < newItemTime))
             {
-                mStaleEntries.put(singleItem.first, singleItem.second);
-                updated.add(singleItem.first);
+                mStaleEntries.put(newItemKey, newItemTime);
+                updated.add(newItemKey);
             }
         }
         return updated;
