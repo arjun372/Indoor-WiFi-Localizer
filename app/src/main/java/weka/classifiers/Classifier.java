@@ -14,7 +14,7 @@
  */
 
 /*
- *    Classifier.java
+ *    DataObjectClassifier.java
  *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
