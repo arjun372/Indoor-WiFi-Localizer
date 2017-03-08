@@ -1,13 +1,20 @@
 package blueguy.rf_localizer;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import blueguy.rf_localizer.utils.PersistentMemoryManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         trainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Training button pressed.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Training button pressed.", Toast.LENGTH_SHORT).show();
                 mShowTrainingPicker();
             }
         });
@@ -43,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         predictButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
                 mShowPredictingPicker();
             }
         });
@@ -52,12 +59,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void mShowTrainingPicker() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Which building/location are you in?")
-                .show();
+        Toast.makeText(this, "Training button", Toast.LENGTH_SHORT).show();
+
+        final EditText textBox = new EditText(this);
+        textBox.setSingleLine(true);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.main_location_prompt)
+                .setView(textBox)
+                .setPositiveButton(R.string.start_training, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(MainActivity.this, "got it " + textBox.getText().toString(), Toast.LENGTH_SHORT).show();
+                        PersistentMemoryManager.updateLocationsList(MainActivity.this, textBox.getText().toString());
+                    }
+                })
+                .show()
+                ;
     }
 
     private void mShowPredictingPicker() {
+        final ArrayList<String> listItems = new ArrayList<>(PersistentMemoryManager.getLocationsList(this));
 
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.main_location_prompt)
+
+                .setSingleChoiceItems(listItems.toArray(new CharSequence[listItems.size()]), 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+//                        Toast.makeText(MainActivity.this, "sup " + listItems.get(which), Toast.LENGTH_SHORT).show();
+                    }
+                })
+
+                .setPositiveButton(R.string.start_predicting, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(MainActivity.this, "sup " + listItems.get(which), Toast.LENGTH_SHORT).show();
+                    }
+                })
+
+                .show();
     }
 }
