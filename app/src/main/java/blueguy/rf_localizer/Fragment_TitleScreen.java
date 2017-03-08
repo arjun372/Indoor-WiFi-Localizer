@@ -78,8 +78,7 @@ public class Fragment_TitleScreen extends Fragment{
                     public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getActivity(), "got it " + textBox.getText().toString(), Toast.LENGTH_SHORT).show();
                         PersistentMemoryManager.updateLocationsList(getActivity(), textBox.getText().toString());
-                        Fragment_TrainingScreen fragment_trainingScreen = Fragment_TrainingScreen.newInstance(textBox.getText().toString());
-                        mChangeFragment(fragment_trainingScreen);
+                        mChangeFragment(Fragment_TrainingScreen.newInstance(textBox.getText().toString()));
                     }
                 })
                 .show()
@@ -102,6 +101,7 @@ public class Fragment_TitleScreen extends Fragment{
                     public void onClick(DialogInterface dialog, int which) {
                         ListView listView = ((AlertDialog)dialog).getListView();
                         Object checkedItem = listView.getAdapter().getItem(listView.getCheckedItemPosition());
+                        mChangeFragment(Fragment_PredictingScreen.newInstance((String)checkedItem));
                     }
                 })
 
