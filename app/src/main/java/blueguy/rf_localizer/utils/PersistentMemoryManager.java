@@ -21,18 +21,18 @@ public class PersistentMemoryManager {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        Set<String> stringSet = new HashSet<String>(vals);
+        Set<String> stringSet = new HashSet<>(vals);
         editor.putStringSet(key, stringSet);
         editor.commit();
     }
 
-    private static final Set<String> getStringList(Context context, String key) {
+    private static final Set<String> getStringSet(Context context, String key) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return  sharedPreferences.getStringSet(key, new HashSet<String>());
+        return new HashSet<>(sharedPreferences.getStringSet(key, new HashSet<String>()));
     }
 
     public static final Set<String> getLocationsList(Context context) {
-        return getStringList(context, KEY_LOCATIONS_LIST);
+        return getStringSet(context, KEY_LOCATIONS_LIST);
     }
 
     public static final void updateLocationsList(Context context, String newLocation) {
