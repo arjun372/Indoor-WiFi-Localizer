@@ -48,7 +48,13 @@ public class ScanService extends Service {
     private List<Pair<DataObject, String>> mAccumulatedDataAndLabels;
     private String mCurrLabel = VAL_UNKNOWN;
 
+    public void setCurrLabel(String newCurrLabel) {
+        mCurrLabel = newCurrLabel;
+    }
 
+    public void resetCurrLabel() {
+        mCurrLabel = VAL_UNKNOWN;
+    }
 
     /**
      * This List contains all the active scanners being polled for data.
