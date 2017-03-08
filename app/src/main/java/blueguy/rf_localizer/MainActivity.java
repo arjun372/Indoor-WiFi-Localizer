@@ -9,10 +9,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import blueguy.rf_localizer.utils.PersistentMemoryManager;
 
@@ -20,12 +20,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         //TODO : Start scan service here
         final Intent startServiceIntent = new Intent(this, ScanService.class);
         startService(startServiceIntent);
 
-        super.onCreate(savedInstanceState);
 
         // Set Layout
         // Set content view layout
@@ -94,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.start_predicting, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(MainActivity.this, "sup " + listItems.get(which), Toast.LENGTH_SHORT).show();
+                        ListView listView = ((AlertDialog)dialog).getListView();
+                        Object checkedItem = listView.getAdapter().getItem(listView.getCheckedItemPosition());
+                        Toast.makeText(MainActivity.this, "sup " + checkedItem, Toast.LENGTH_SHORT).show();
                     }
                 })
 

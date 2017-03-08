@@ -44,6 +44,18 @@ public class ScanService extends Service {
         return mDataBase;
     }
 
+
+    private List<Pair<DataObject, String>> mAccumulatedDataAndLabels;
+    private String mCurrLabel = VAL_UNKNOWN;
+
+    public void setCurrLabel(String newCurrLabel) {
+        mCurrLabel = newCurrLabel;
+    }
+
+    public void resetCurrLabel() {
+        mCurrLabel = VAL_UNKNOWN;
+    }
+
     /**
      * This List contains all the active scanners being polled for data.
      */
@@ -115,36 +127,48 @@ public class ScanService extends Service {
         /** TODO : ensure scanned data gets dumped to file. **/
     }
 
-    private static ScannerCallback mScannerCallback = new ScannerCallback() {
+//    private static ScannerCallback mScannerCallback = new ScannerCallback() {
+//        @Override
+//        public void onScanResult(final List<DataObject> dataList) {
+//
+//            for (final DataObject dataObject : dataList) {
+//
+//                // TODO: Check: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
+//
+//                // Start keeping track of feature names that were updated so the rest can be filled with unknowns
+//                Set<String> unUpdatedKeys = (mDataBase == null) ? (new HashSet<String>()) : (new HashSet<>(mDataBase.keySet()));
+//
+//                // First, push the timestamp on to the HashMap for this new data row
+//                ScanService.mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
+//                unUpdatedKeys.remove(KEY_TIMESTAMP);
+//
+//               // Log.d(CALLBACK, dataObject.mDataVals.toString());
+//
+//                // Add each data value to the mDataBase HashMap
+//                for (final Pair<String, Object> dataPair : dataObject.mDataVals) {
+//
+//                    ScanService.mAddToDataBase(dataObject.mID + "_" + dataPair.first, dataPair.second);
+//
+//                    // Remove this feature name from unUpdatedKeys
+//                    unUpdatedKeys.remove(dataObject.mID + "_" + dataPair.first);
+//                }
+//
+//                // For each unUpdatedKey, fill in with unknown value, '?'
+//                for (String key : unUpdatedKeys) {
+//                    ScanService.mAddToDataBase(key, VAL_UNKNOWN);
+//                }
+//            }
+//        }
+//    };
+
+    private ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(final List<DataObject> dataList) {
-
+            if (mAccumulatedDataAndLabels == null) {
+                mAccumulatedDataAndLabels = new ArrayList<>();
+            }
             for (final DataObject dataObject : dataList) {
-
-                // TODO: Check: Need to add to each list in the hash map, mDataBase, based on the concatenated id and dataval id, where the rest empty are question marks
-
-                // Start keeping track of feature names that were updated so the rest can be filled with unknowns
-                Set<String> unUpdatedKeys = (mDataBase == null) ? (new HashSet<String>()) : (new HashSet<>(mDataBase.keySet()));
-
-                // First, push the timestamp on to the HashMap for this new data row
-                ScanService.mAddToDataBase(KEY_TIMESTAMP, dataObject.mTimeStamp);
-                unUpdatedKeys.remove(KEY_TIMESTAMP);
-
-               // Log.d(CALLBACK, dataObject.mDataVals.toString());
-
-                // Add each data value to the mDataBase HashMap
-                for (final Pair<String, Object> dataPair : dataObject.mDataVals) {
-
-                    ScanService.mAddToDataBase(dataObject.mID + "_" + dataPair.first, dataPair.second);
-
-                    // Remove this feature name from unUpdatedKeys
-                    unUpdatedKeys.remove(dataObject.mID + "_" + dataPair.first);
-                }
-
-                // For each unUpdatedKey, fill in with unknown value, '?'
-                for (String key : unUpdatedKeys) {
-                    ScanService.mAddToDataBase(key, VAL_UNKNOWN);
-                }
+                mAccumulatedDataAndLabels.add(new Pair<>(dataObject, mCurrLabel));
             }
         }
     };
