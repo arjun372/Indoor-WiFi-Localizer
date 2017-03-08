@@ -50,10 +50,12 @@ public class ScanService extends Service {
 
     public void setCurrLabel(String newCurrLabel) {
         mCurrLabel = newCurrLabel;
+//        Toast.makeText(this, "new label: " + mCurrLabel, Toast.LENGTH_SHORT).show();
     }
 
     public void resetCurrLabel() {
         mCurrLabel = VAL_UNKNOWN;
+//        Toast.makeText(this, "new label: " + mCurrLabel, Toast.LENGTH_SHORT).show();
     }
 
     /**

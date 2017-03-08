@@ -4,13 +4,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -22,21 +22,13 @@ import blueguy.rf_localizer.utils.PersistentMemoryManager;
  */
 public class Fragment_TitleScreen extends Fragment{
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
+    public Fragment_TitleScreen() {
+        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-//        TextView textView = new TextView(getActivity());
-//        textView.setText(R.string.hello_blank_fragment);
-
         // Set Layout
         // Set content view layout
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -64,9 +56,16 @@ public class Fragment_TitleScreen extends Fragment{
         return rootView;
     }
 
+    private void mChangeFragment(Fragment fragment) {
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction
+                .replace(R.id.main_fragment_container, fragment)
+                .addToBackStack("Fragment_TitleScreen")
+                .commit();
+    }
+
 
     private void mShowTrainingPicker() {
-        Toast.makeText(getActivity(), "Training button", Toast.LENGTH_SHORT).show();
 
         final EditText textBox = new EditText(getActivity());
         textBox.setSingleLine(true);
@@ -79,6 +78,8 @@ public class Fragment_TitleScreen extends Fragment{
                     public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getActivity(), "got it " + textBox.getText().toString(), Toast.LENGTH_SHORT).show();
                         PersistentMemoryManager.updateLocationsList(getActivity(), textBox.getText().toString());
+                        Fragment_TrainingScreen fragment_trainingScreen = Fragment_TrainingScreen.newInstance(textBox.getText().toString());
+                        mChangeFragment(fragment_trainingScreen);
                     }
                 })
                 .show()
@@ -101,7 +102,6 @@ public class Fragment_TitleScreen extends Fragment{
                     public void onClick(DialogInterface dialog, int which) {
                         ListView listView = ((AlertDialog)dialog).getListView();
                         Object checkedItem = listView.getAdapter().getItem(listView.getCheckedItemPosition());
-                        Toast.makeText(getActivity(), "sup " + checkedItem, Toast.LENGTH_SHORT).show();
                     }
                 })
 
