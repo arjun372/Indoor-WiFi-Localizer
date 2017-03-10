@@ -89,7 +89,7 @@ public class WifiScanner extends Scanner {
             mContext.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             isRegistered = true;
             mHandler.post(requestScan);
-            Log.d(TAG, "started scan handler");
+            Log.d(TAG, "started");
         }
         return false;
     }
@@ -102,7 +102,7 @@ public class WifiScanner extends Scanner {
             isRegistered = false;
             mHandler.removeCallbacks(requestScan);
             setWifiLock(false);
-            Log.d(TAG, "stopped scan handler");
+            Log.d(TAG, "stopped");
         }
         return false;
     }

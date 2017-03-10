@@ -42,7 +42,7 @@ public class CellScanner extends Scanner {
         {
             isRegistered = true;
             mHandler.post(requestScan);
-            Log.d(TAG, "started scan handler");
+            Log.d(TAG, "started");
         }
         return false;
     }
@@ -53,7 +53,7 @@ public class CellScanner extends Scanner {
         {
             isRegistered = false;
             mHandler.removeCallbacks(requestScan);
-            Log.d(TAG, "stopped scan handler");
+            Log.d(TAG, "stopped");
         }
         return false;
     }
@@ -95,20 +95,20 @@ public class CellScanner extends Scanner {
             long timestamp = System.currentTimeMillis() - RF_Localizer_Application.timeOfBoot;
             String identity = "cell_tower";
 
-            int dbm = Integer.MIN_VALUE;
-            int lvl  = Integer.MIN_VALUE;
-            int asu_lvl = Integer.MIN_VALUE;
+            int dbm     = 0;
+            int lvl     = 0;
+            int asu_lvl = 0;
 
-            int cdma_dbm  = Integer.MIN_VALUE;
-            int cdma_lvl  = Integer.MIN_VALUE;
-            int cdma_ecio = Integer.MIN_VALUE;
+            int cdma_dbm  = 0;
+            int cdma_lvl  = 0;
+            int cdma_ecio = 0;
 
-            int evdo_dbm  = Integer.MIN_VALUE;
-            int evdo_lvl  = Integer.MIN_VALUE;
-            int evdo_ecio = Integer.MIN_VALUE;
-            int evdo_snr  = Integer.MIN_VALUE;
+            int evdo_dbm  = 0;
+            int evdo_lvl  = 0;
+            int evdo_ecio = 0;
+            int evdo_snr  = 0;
 
-            int timing_advance = Integer.MIN_VALUE;
+            int timing_advance = 0;
 
             if (singleCellInfo instanceof NeighboringCellInfo)
             {

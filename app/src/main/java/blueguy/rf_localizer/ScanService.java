@@ -18,8 +18,12 @@ import java.util.Set;
 import blueguy.rf_localizer.Scanners.BluetoothScanner;
 import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
+import blueguy.rf_localizer.Scanners.MagneticFieldScanner;
+import blueguy.rf_localizer.Scanners.PressureScanner;
+import blueguy.rf_localizer.Scanners.RotationScanner;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
+import blueguy.rf_localizer.Scanners.VelocityScanner;
 import blueguy.rf_localizer.Scanners.WifiScanner;
 import blueguy.rf_localizer.utils.PersistentMemoryManager;
 
@@ -212,11 +216,12 @@ public class ScanService extends Service {
         curScanners.add(new WifiScanner(mScannerCallback));
         curScanners.add(new CellScanner(mScannerCallback));
         curScanners.add(new BluetoothScanner(mScannerCallback));
+        curScanners.add(new VelocityScanner(mScannerCallback));
+        curScanners.add(new RotationScanner(mScannerCallback));
+        curScanners.add(new MagneticFieldScanner(mScannerCallback));
+        curScanners.add(new PressureScanner(mScannerCallback));
 
-//        curScanners.add(new VelocityScanner(mScannerCallback));
 //        curScanners.add(new AltitudeScanner(mScannerCallback));
-//        curScanners.add(new RotationScanner(mScannerCallback));
-
         for(Scanner scanner : curScanners) {
             scanner.startScan();
         }

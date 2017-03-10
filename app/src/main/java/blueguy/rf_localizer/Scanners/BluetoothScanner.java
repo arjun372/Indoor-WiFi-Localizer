@@ -27,7 +27,7 @@ public class BluetoothScanner extends Scanner {
         {
             isRegistered = true;
             mHandler.post(requestScan);
-            Log.d(TAG, "started scan handler");
+            Log.d(TAG, "started");
         }
         return false;
     }
@@ -38,7 +38,7 @@ public class BluetoothScanner extends Scanner {
         {
             isRegistered = false;
             mHandler.removeCallbacks(requestScan);
-            Log.d(TAG, "stopped scan handler");
+            Log.d(TAG, "stopped");
         }
         return false;
     }
