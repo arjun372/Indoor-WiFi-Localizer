@@ -1,7 +1,6 @@
 package blueguy.rf_localizer;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,6 +19,8 @@ import android.widget.Toast;
 public class Fragment_TrainingScreen extends Fragment {
     private static final String KEY_LOCATION = "location";
 
+    private String mCurrLocation = "";
+
     public static Fragment_TrainingScreen newInstance(String location) {
         Bundle bundle = new Bundle();
         bundle.putString(KEY_LOCATION, location);
@@ -35,8 +36,8 @@ public class Fragment_TrainingScreen extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ((MainActivity)getActivity()).bindScanService();
+        mCurrLocation = getArguments().getString(KEY_LOCATION);
+        ((MainActivity)getActivity()).bindScanService(mCurrLocation);
     }
 
     @Override

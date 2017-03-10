@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 public class MainActivity extends AppCompatActivity {
 
     public ScanService mScanService;
@@ -60,8 +62,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void bindScanService() {
+    public void bindScanService(String location) {
         Intent intent = new Intent(this, ScanService.class);
+        intent.putExtra(ScanService.TAG_LOCATION, location);
         bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 

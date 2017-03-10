@@ -26,6 +26,7 @@ public class ScanService extends Service {
 
     private static final String TAG = "ScanService";
     private static final String CALLBACK = "ScanCallback";
+    public static final String TAG_LOCATION = "location";
 //    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
     /**
@@ -48,6 +49,8 @@ public class ScanService extends Service {
     private List<Pair<DataObject, String>> mAccumulatedDataAndLabels;
     private String mCurrLabel = VAL_UNKNOWN;
 
+    private String mLocation = VAL_UNKNOWN;
+
     public void setCurrLabel(String newCurrLabel) {
         mCurrLabel = newCurrLabel;
 //        Toast.makeText(this, "new label: " + mCurrLabel, Toast.LENGTH_SHORT).show();
@@ -56,6 +59,14 @@ public class ScanService extends Service {
     public void resetCurrLabel() {
         mCurrLabel = VAL_UNKNOWN;
 //        Toast.makeText(this, "new label: " + mCurrLabel, Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void setupCurrLocation(String location) {
+        mLocation = location;
+
+//        Toast.makeText(this, "new location: " + mLocation, Toast.LENGTH_SHORT).show();
+        // TODO: Also need to load correct classifier from memory, or create a new one if necessary
     }
 
     /**
@@ -104,6 +115,15 @@ public class ScanService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        String location = intent.getStringExtra(TAG_LOCATION);
+        if ((location == null) || (location.isEmpty())) {
+            throw new IllegalArgumentException("Valid location must be passed in Intent String extra with key: " + TAG_LOCATION);
+        } else {
+            setupCurrLocation(location);
+        }
+
+        resetCurrLabel();
+
         return mBinder;
     }
 
@@ -211,6 +231,15 @@ public class ScanService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStart: " + startId + ":" + intent);
+
+//        String location = intent.getStringExtra(TAG_LOCATION);
+//        if ((location == null) || (location.isEmpty())) {
+//            throw new IllegalArgumentException("Valid location must be passed in Intent String extra with key: " + TAG_LOCATION);
+//        } else {
+//            setupCurrLocation(location);
+//        }
+//
+//        resetCurrLabel();
 
         // TODO : run scanners here, permanently.
         for (Scanner scanner : mScannerList) {

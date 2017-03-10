@@ -18,6 +18,8 @@ import android.widget.TextView;
 public class Fragment_PredictingScreen extends Fragment {
     private static final String KEY_LOCATION = "location";
 
+    private String mCurrLocation = "";
+
     public Fragment_PredictingScreen() {
         // Required empty public constructor
     }
@@ -40,7 +42,8 @@ public class Fragment_PredictingScreen extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((MainActivity)getActivity()).bindScanService();
+        mCurrLocation = getArguments().getString(KEY_LOCATION);
+        ((MainActivity)getActivity()).bindScanService(mCurrLocation);
     }
 
     @Override
