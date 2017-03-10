@@ -9,8 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
-import java.util.HashMap;
-
 public class MainActivity extends AppCompatActivity {
 
     public ScanService mScanService;

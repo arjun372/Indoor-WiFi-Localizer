@@ -21,6 +21,7 @@ import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
 import blueguy.rf_localizer.Scanners.WifiScanner;
+import blueguy.rf_localizer.utils.PersistentMemoryManager;
 
 public class ScanService extends Service {
 
@@ -29,6 +30,11 @@ public class ScanService extends Service {
     public static final String TAG_LOCATION = "location";
 //    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
+    private static final String KEY_TIMESTAMP = "timestamp";
+    private static final String VAL_UNKNOWN = "?";
+
+
+    // TODO: Remove mDataBase HashMap
     /**
      * HashMap containing the data to write, whenever we want to use it.
      *
@@ -38,13 +44,15 @@ public class ScanService extends Service {
      *
      */
     private static HashMap<String, List<Object>> mDataBase;// = new HashMap<>();
-    private static final String KEY_TIMESTAMP = "timestamp";
-    private static final String VAL_UNKNOWN = "?";
 
     public static HashMap<String, List<Object>> getDataBase() {
         return mDataBase;
     }
 
+    //
+
+
+    private DataObjectClassifier mCurrDataObjectClassifier = null;
 
     private List<Pair<DataObject, String>> mAccumulatedDataAndLabels;
     private String mCurrLabel = VAL_UNKNOWN;
@@ -67,6 +75,8 @@ public class ScanService extends Service {
 
 //        Toast.makeText(this, "new location: " + mLocation, Toast.LENGTH_SHORT).show();
         // TODO: Also need to load correct classifier from memory, or create a new one if necessary
+
+
     }
 
     /**
