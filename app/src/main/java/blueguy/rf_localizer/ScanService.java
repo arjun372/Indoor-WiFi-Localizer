@@ -8,12 +8,11 @@ import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import blueguy.rf_localizer.Scanners.BluetoothScanner;
 import blueguy.rf_localizer.Scanners.CellScanner;
@@ -79,7 +78,12 @@ public class ScanService extends Service {
 
 //        Toast.makeText(this, "new location: " + mLocation, Toast.LENGTH_SHORT).show();
         // TODO: Also need to load correct classifier from memory, or create a new one if necessary
-
+        mCurrDataObjectClassifier = null;
+        try {
+            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(this, mLocation);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
     }
 

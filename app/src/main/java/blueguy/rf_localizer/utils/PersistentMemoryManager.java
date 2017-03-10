@@ -13,8 +13,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import blueguy.rf_localizer.DataObjectClassifier;
-
 /**
  * Created by Rahul on 3/7/2017.
  */
@@ -48,19 +46,19 @@ public class PersistentMemoryManager {
         putStringCollection(context, KEY_LOCATIONS_LIST, prevSet);
     }
 
-    public static final DataObjectClassifier loadClassifier(Context context, String classifierName) throws IOException, ClassNotFoundException {
+    public static final Object loadObjectFile(Context context, String classifierName) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = context.openFileInput(classifierName);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-        DataObjectClassifier dataObjectClassifier = (DataObjectClassifier) objectInputStream.readObject();
+        Object object = objectInputStream.readObject();
         objectInputStream.close();
         fileInputStream.close();
-        return dataObjectClassifier;
+        return object;
     }
 
-    public static final void saveClassifier(Context context, String classifierName, DataObjectClassifier dataObjectClassifier) throws IOException {
+    public static final void saveObjectFile(Context context, String classifierName, Object object) throws IOException {
         FileOutputStream fileOutputStream = context.openFileOutput(classifierName, Context.MODE_PRIVATE);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-        objectOutputStream.writeObject(dataObjectClassifier);
+        objectOutputStream.writeObject(object);
         objectOutputStream.close();
         fileOutputStream.close();
     }
