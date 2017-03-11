@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +13,9 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.zip.Deflater;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by Rahul on 3/7/2017.
@@ -47,8 +51,8 @@ public class PersistentMemoryManager {
     }
 
     public static final Object loadObjectFile(Context context, String classifierName) throws IOException, ClassNotFoundException {
-        FileInputStream fileInputStream = context.openFileInput(classifierName);
-        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        FileInputStream fileInputStream = context.openFileInput(classifierName+".gz");
+        ObjectInputStream objectInputStream = new ObjectInputStream(new GZIPInputStream(fileInputStream));
         Object object = objectInputStream.readObject();
         objectInputStream.close();
         fileInputStream.close();
@@ -56,8 +60,8 @@ public class PersistentMemoryManager {
     }
 
     public static final void saveObjectFile(Context context, String classifierName, Object object) throws IOException {
-        FileOutputStream fileOutputStream = context.openFileOutput(classifierName, Context.MODE_PRIVATE);
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+        FileOutputStream fileOutputStream = context.openFileOutput(classifierName+".gz", Context.MODE_PRIVATE);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(fileOutputStream)));
         objectOutputStream.writeObject(object);
         objectOutputStream.close();
         fileOutputStream.close();

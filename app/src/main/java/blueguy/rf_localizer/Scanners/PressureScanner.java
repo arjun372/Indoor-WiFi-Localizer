@@ -6,13 +6,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
+import blueguy.rf_localizer.utils.DataPair;
 
 /**
  * Created by work on 3/10/17.
@@ -61,8 +61,8 @@ public class PressureScanner extends Scanner implements SensorEventListener {
         final String sensorType = "baro";
         final Long timestamp = event.timestamp;
 
-        List<Pair<String, Object>> features = new ArrayList<>();
-        features.add(new Pair<String, Object>("p", event.values[0]));
+        List<DataPair<String, Object>> features = new ArrayList<>();
+        features.add(new DataPair<String, Object>("p", event.values[0]));
 
         final DataObject sensorData = new DataObject(timestamp, sensorType, features);
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));

@@ -1,16 +1,28 @@
 package blueguy.rf_localizer.Scanners;
 
-import android.util.Pair;
-
+import java.io.Serializable;
 import java.util.List;
+
+import blueguy.rf_localizer.utils.DataPair;
 
 /**
  * Created by Rahul on 2/22/2017.
  */
 
-public class DataObject {
+public class DataObject implements Serializable{
 
     public DataObject() {}
+
+    static final long serialVersionUID = 1L;
+
+    @Override
+    public String toString() {
+        return "DataObject{" +
+                "mTimeStamp=" + mTimeStamp +
+                ", mID='" + mID + '\'' +
+                ", mDataVals=" + mDataVals +
+                '}';
+    }
 
     /**
      * DataObject is a container used to pass data among Scanner objects and ScannerCallback
@@ -22,7 +34,7 @@ public class DataObject {
      *                                  .first  = the String denoting the feature name of this value
      *                                  .second = the actual value of the data
      */
-    public DataObject(Long mTimeStamp, String mID, List<Pair<String, Object>> mDataVals) {
+    public DataObject(Long mTimeStamp, String mID, List<DataPair<String, Object>> mDataVals) {
         this.mTimeStamp = mTimeStamp;
         this.mID = mID;
         this.mDataVals = mDataVals;
@@ -44,5 +56,6 @@ public class DataObject {
      *  .first  = a String indicating the feature name of the specific value given.
      *  .second = this Object is the actual value (with a .toString function)
      */
-    public List<Pair<String, Object>> mDataVals;
+    public List<DataPair<String, Object>> mDataVals;
+
 }

@@ -8,15 +8,12 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
+import blueguy.rf_localizer.utils.DataPair;
 
 /**
  * Created by work on 2/22/17.
@@ -64,15 +61,15 @@ public class WifiScanner extends Scanner {
             final int mimo = network.is80211mcResponder() ? 1 : 0;
             final int passpoint = network.isPasspointNetwork() ? 1 : 0;
 
-            List<Pair<String, Object>> networkDataVals = new ArrayList<>();
+            List<DataPair<String, Object>> networkDataVals = new ArrayList<>();
 
-            networkDataVals.add(new Pair<String, Object>("dbm", dbm));
-            networkDataVals.add(new Pair<String, Object>("freq", freq));
-            networkDataVals.add(new Pair<String, Object>("mimo", mimo));
-            networkDataVals.add(new Pair<String, Object>("channel_width", channel_width));
-            networkDataVals.add(new Pair<String, Object>("passpoint", passpoint));
-            networkDataVals.add(new Pair<String, Object>("center_freq0", centerFreq0));
-            networkDataVals.add(new Pair<String, Object>("center_freq1", centerFreq1));
+            networkDataVals.add(new DataPair<String, Object>("dbm", dbm));
+            networkDataVals.add(new DataPair<String, Object>("freq", freq));
+            networkDataVals.add(new DataPair<String, Object>("mimo", mimo));
+            networkDataVals.add(new DataPair<String, Object>("channel_width", channel_width));
+            networkDataVals.add(new DataPair<String, Object>("passpoint", passpoint));
+            networkDataVals.add(new DataPair<String, Object>("center_freq0", centerFreq0));
+            networkDataVals.add(new DataPair<String, Object>("center_freq1", centerFreq1));
 
             final DataObject newNetwork = new DataObject(timestampFound, network.BSSID, networkDataVals);
             networkDataObjects.add(newNetwork);

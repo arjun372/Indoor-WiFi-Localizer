@@ -2,10 +2,12 @@ package blueguy.rf_localizer;
 
 import android.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import blueguy.rf_localizer.Scanners.DataObject;
+import blueguy.rf_localizer.utils.DataPair;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.classifiers.*;
 import weka.core.Instance;
@@ -17,21 +19,17 @@ import weka.core.Instances;
 
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
-public class DataObjectClassifier {
+public class DataObjectClassifier implements Serializable{
 
-    private List<Pair<DataObject, String>> labeled_data;
+    private List<DataPair<DataObject, String>> labeled_data;
     private Classifier classifier;
 
-    public DataObjectClassifier(final List<Pair<DataObject, String>> dataWithLabels, final String[] options) throws Exception{
+
+    public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels) throws Exception{
 
         final Instances dataInstances = convertDataObjectToInstances(dataWithLabels);
-
         /* save data for future use */
         this.labeled_data = dataWithLabels;
-    }
-
-    public DataObjectClassifier(final List<Pair<DataObject, String>> dataWithLabels) {
-
     }
 
     /**
@@ -39,7 +37,7 @@ public class DataObjectClassifier {
      * @param data
      * @return
      */
-    public List<Pair<String, Double>> classify(final List<DataObject> data) {
+    public List<DataPair<String, Double>> classify(final List<DataObject> data) {
         return new ArrayList<>();
     }
 
@@ -48,11 +46,11 @@ public class DataObjectClassifier {
      * @param labeledData
      * @return
      */
-    public List<Pair<String, Double>> evaluate(final List<Pair<DataObject, String>> labeledData) {
+    public List<DataPair<String, Double>> evaluate(final List<DataPair<DataObject, String>> labeledData) {
         return new ArrayList<>();
     }
 
-    public static Instances convertDataObjectToInstances(final List<Pair<DataObject, String>> dataWithLabels) throws Exception{
+    public static Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels) throws Exception{
         //return new Instances();
         return null;
     }

@@ -2,7 +2,6 @@ package blueguy.rf_localizer.Scanners;
 
 import android.content.Context;
 import android.os.Handler;
-import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
@@ -10,14 +9,12 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.Pair;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
+import blueguy.rf_localizer.utils.DataPair;
 
 /**
  * Created by work on 2/22/17.
@@ -173,22 +170,22 @@ public class CellScanner extends Scanner {
                 asu_lvl = info.getCellSignalStrength().getAsuLevel();
             }
 
-            List<Pair<String, Object>> dataVector = new ArrayList<>();
+            List<DataPair<String, Object>> dataVector = new ArrayList<>();
 
-            dataVector.add(new Pair<String, Object>("dbm", dbm));
-            dataVector.add(new Pair<String, Object>("asu_lvl", asu_lvl));
-            dataVector.add(new Pair<String, Object>("lvl", lvl));
+            dataVector.add(new DataPair<String, Object>("dbm", dbm));
+            dataVector.add(new DataPair<String, Object>("asu_lvl", asu_lvl));
+            dataVector.add(new DataPair<String, Object>("lvl", lvl));
 
-            dataVector.add(new Pair<String, Object>("cdma_dbm", cdma_dbm));
-            dataVector.add(new Pair<String, Object>("cdma_lvl", cdma_lvl));
-            dataVector.add(new Pair<String, Object>("cdma_ecio", cdma_ecio));
+            dataVector.add(new DataPair<String, Object>("cdma_dbm", cdma_dbm));
+            dataVector.add(new DataPair<String, Object>("cdma_lvl", cdma_lvl));
+            dataVector.add(new DataPair<String, Object>("cdma_ecio", cdma_ecio));
 
-            dataVector.add(new Pair<String, Object>("evdo_dbm", evdo_dbm));
-            dataVector.add(new Pair<String, Object>("evdo_lvl", evdo_lvl));
-            dataVector.add(new Pair<String, Object>("evdo_ecio", evdo_ecio));
-            dataVector.add(new Pair<String, Object>("evdo_snr", evdo_snr));
+            dataVector.add(new DataPair<String, Object>("evdo_dbm", evdo_dbm));
+            dataVector.add(new DataPair<String, Object>("evdo_lvl", evdo_lvl));
+            dataVector.add(new DataPair<String, Object>("evdo_ecio", evdo_ecio));
+            dataVector.add(new DataPair<String, Object>("evdo_snr", evdo_snr));
 
-            dataVector.add(new Pair<String, Object>("timing_adv", timing_advance));
+            dataVector.add(new DataPair<String, Object>("timing_adv", timing_advance));
 
             final DataObject newCellTower = new DataObject(timestamp, identity, dataVector);
             newCellTowers.add(newCellTower);

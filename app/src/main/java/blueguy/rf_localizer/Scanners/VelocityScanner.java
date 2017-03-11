@@ -10,12 +10,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
+import blueguy.rf_localizer.utils.DataPair;
 
 public class VelocityScanner extends Scanner implements SensorEventListener {
 
@@ -63,7 +63,7 @@ public class VelocityScanner extends Scanner implements SensorEventListener {
 
 //        Log.d(TAG, timestamp + ", " + sensorType + ", " + velocity);
 
-        Pair<String, Object> gyro_a = new Pair<String, Object>("a", velocity);
+        DataPair<String, Object> gyro_a = new DataPair<String, Object>("a", velocity);
         final DataObject sensorData = new DataObject(timestamp, sensorType, Collections.singletonList(gyro_a));
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));
         mScannerCallback.onScanResult(updatedEntries);

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import blueguy.rf_localizer.RF_Localizer_Application;
+import blueguy.rf_localizer.utils.DataPair;
 
 /**
  * Created by work on 3/10/17.
@@ -61,10 +62,10 @@ public class MagneticFieldScanner extends Scanner implements SensorEventListener
         final String sensorType = "magnetic";
         final Long timestamp = event.timestamp;
 
-        List<Pair<String, Object>> features = new ArrayList<>();
-        features.add(new Pair<String, Object>("x", event.values[0]));
-        features.add(new Pair<String, Object>("y", event.values[1]));
-        features.add(new Pair<String, Object>("z", event.values[2]));
+        List<DataPair<String, Object>> features = new ArrayList<>();
+        features.add(new DataPair<String, Object>("x", event.values[0]));
+        features.add(new DataPair<String, Object>("y", event.values[1]));
+        features.add(new DataPair<String, Object>("z", event.values[2]));
 
         final DataObject sensorData = new DataObject(timestamp, sensorType, features);
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));
