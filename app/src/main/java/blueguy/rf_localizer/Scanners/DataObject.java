@@ -58,4 +58,10 @@ public class DataObject implements Serializable{
      */
     public List<DataPair<String, Object>> mDataVals;
 
+
+
+    public static final String concatFeatureID (String dataObjectID, String dataFeatureID) {
+        return dataObjectID + "_" + dataFeatureID;
+    }
+
 }

@@ -75,16 +75,33 @@ public class ScanService extends Service {
     private void setupCurrLocation(String location) {
         mLocation = location;
 
+
         try {
-            mAccumulatedDataAndLabels = (List<DataPair<DataObject, String>>) PersistentMemoryManager.loadObjectFile(this, mLocation);
+            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(this, mLocation);
+            mAccumulatedDataAndLabels = mCurrDataObjectClassifier.getLabeled_data();
             Log.e(TAG, "successfully loaded mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
-            printList(mAccumulatedDataAndLabels);
-        } catch (IOException e) {
+//            printList(mAccumulatedDataAndLabels);
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            mCurrDataObjectClassifier = null;
+            mAccumulatedDataAndLabels = new ArrayList<>();
+        }
+    }
+
+    public void trainClassifier() {
+        try {
+            mCurrDataObjectClassifier = new DataObjectClassifier(mAccumulatedDataAndLabels, mLocation);
+            PersistentMemoryManager.saveObjectFile(this, mLocation, mCurrDataObjectClassifier);
+            Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public String predictOnData(long timeStart, long timeEnd) {
+        return "lol";
+    }
+
     private static void printList(final List<DataPair<DataObject, String>> data) {
         for(final DataPair<DataObject, String> single : data) {
             Log.e(TAG, single.second + ": "+single.first.toString());
@@ -147,13 +164,6 @@ public class ScanService extends Service {
         Log.d(TAG, "onDestroy");
 
         mScannerList = mRemoveScanners(mScannerList);
-
-        try {
-            PersistentMemoryManager.saveObjectFile(this, mLocation, mAccumulatedDataAndLabels);
-            Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         Toast.makeText(this, "onDestroy: scanService", Toast.LENGTH_SHORT).show();
         /** TODO : ensure scanned data gets dumped to file. **/

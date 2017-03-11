@@ -89,7 +89,6 @@ public class Fragment_TrainingScreen extends Fragment {
         finishTrainingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).mScanService.resetCurrLabel();
                 labelText.getText().clear();
                 getActivity().onBackPressed();
             }
@@ -98,4 +97,10 @@ public class Fragment_TrainingScreen extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((MainActivity)getActivity()).mScanService.trainClassifier();
+        ((MainActivity)getActivity()).mScanService.resetCurrLabel();
+    }
 }
