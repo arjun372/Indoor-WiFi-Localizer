@@ -34,7 +34,7 @@ public class DataObject implements Serializable{
      *                                  .first  = the String denoting the feature name of this value
      *                                  .second = the actual value of the data
      */
-    public DataObject(Long mTimeStamp, String mID, List<DataPair<String, Object>> mDataVals) {
+    public DataObject(Long mTimeStamp, String mID, List<DataPair> mDataVals) {
         this.mTimeStamp = mTimeStamp;
         this.mID = mID;
         this.mDataVals = mDataVals;
@@ -56,7 +56,7 @@ public class DataObject implements Serializable{
      *  .first  = a String indicating the feature name of the specific value given.
      *  .second = this Object is the actual value (with a .toString function)
      */
-    public List<DataPair<String, Object>> mDataVals;
+    public List<DataPair> mDataVals;
 
 
 

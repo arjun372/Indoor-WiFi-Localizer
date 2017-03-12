@@ -61,15 +61,15 @@ public class WifiScanner extends Scanner {
             final int mimo = network.is80211mcResponder() ? 1 : 0;
             final int passpoint = network.isPasspointNetwork() ? 1 : 0;
 
-            List<DataPair<String, Object>> networkDataVals = new ArrayList<>();
+            List<DataPair> networkDataVals = new ArrayList<>();
 
-            networkDataVals.add(new DataPair<String, Object>("dbm", dbm));
-            networkDataVals.add(new DataPair<String, Object>("freq", freq));
-            networkDataVals.add(new DataPair<String, Object>("mimo", mimo));
-            networkDataVals.add(new DataPair<String, Object>("channel_width", channel_width));
-            networkDataVals.add(new DataPair<String, Object>("passpoint", passpoint));
-            networkDataVals.add(new DataPair<String, Object>("center_freq0", centerFreq0));
-            networkDataVals.add(new DataPair<String, Object>("center_freq1", centerFreq1));
+            networkDataVals.add(new DataPair<>("dbm", dbm));
+            networkDataVals.add(new DataPair<>("freq", freq));
+            networkDataVals.add(new DataPair<>("mimo", mimo));
+            networkDataVals.add(new DataPair<>("channel_width", channel_width));
+            networkDataVals.add(new DataPair<>("passpoint", passpoint));
+            networkDataVals.add(new DataPair<>("center_freq0", centerFreq0));
+            networkDataVals.add(new DataPair<>("center_freq1", centerFreq1));
 
             final DataObject newNetwork = new DataObject(timestampFound, network.BSSID, networkDataVals);
             networkDataObjects.add(newNetwork);

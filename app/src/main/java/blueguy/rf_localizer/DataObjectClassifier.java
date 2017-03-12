@@ -1,10 +1,12 @@
 package blueguy.rf_localizer;
 
+import android.os.Environment;
 import android.util.Log;
+import java.io.File;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +19,7 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
@@ -26,27 +29,32 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
 public class DataObjectClassifier implements Serializable{
 
+    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+
+    private static final String TAG = DataObjectClassifier.class.getSimpleName();
+
     private static final long serialVersionUID = 3L;
 
     private List<DataPair<DataObject, String>> labeled_data;
     private Classifier classifier;
     private String mClassifierName;
 
-
-    private static final String ATTRIBUTE_TIMESTAMP = "timestamp";
     private static final String ATTRIBUTE_CLASS = "class";
 
     public List<DataPair<DataObject, String>> getLabeled_data() {
         return labeled_data;
     }
 
-    public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, String locationName) throws Exception{
+    public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, String locationName) {
 
         /* save data for future use */
         final Instances dataInstances = convertDataObjectToInstances(dataWithLabels, locationName);
-//        this.classifier = buildClassifier(dataInstances);
+        this.classifier = buildClassifier(dataInstances);
         this.labeled_data = dataWithLabels;
-        mClassifierName = locationName;
+        this.mClassifierName = locationName;
+
+        /* save instances to arff for inspection */
+        InstancesToArff(dataInstances);
     }
 
     /**
@@ -72,68 +80,167 @@ public class DataObjectClassifier implements Serializable{
 
     }
 
-    public static Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels, String classifierName) throws Exception{
-        //return new Instances();
-       // create hashmap wherer the key is the name of the feature and value is an integer which is an index of the column number of that feature
+    public static Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels, final String classifierName) {
 
         HashMap<String, Integer> featureColumnIndex = new HashMap<>();
         HashSet<String> classLabels = new HashSet<>();
 
         int indexCount = 0;
-        featureColumnIndex.put(ATTRIBUTE_TIMESTAMP, indexCount++);
-        featureColumnIndex.put(ATTRIBUTE_CLASS, indexCount++);
+        int meaningfulFeatureCount = 0;
 
-        for (DataPair<DataObject, String> dataPair : dataWithLabels) {
+        for (final DataPair<DataObject, String> dataPair : dataWithLabels) {
 
-            // Add current class label to set
-            classLabels.add(dataPair.second);
+            /* Handle first part -> DataObject here */
+            final String dataObjectID = dataPair.first.mID;
+            final Long dataObjectTime = dataPair.first.mTimeStamp;
+            final List<DataPair> dataObjectVals = dataPair.first.mDataVals;
 
-            for (DataPair<String, Object> dataValPair : dataPair.first.mDataVals) {
-                String key = DataObject.concatFeatureID(dataPair.first.mID, dataValPair.first);
-                if (!featureColumnIndex.containsKey(key)) {
-                    featureColumnIndex.put(key, indexCount++);
+            /* Iterate over DataPair list, concatenating each key with @dataObjectID to create a unique feature name */
+            for (final DataPair objectDataPair : dataObjectVals)
+            {
+                final String keyName = (String) objectDataPair.first;
+                final String uniqueFeatureID = DataObject.concatFeatureID(dataObjectID, keyName);
+
+                if (!featureColumnIndex.containsKey(uniqueFeatureID)) {
+                    featureColumnIndex.put(uniqueFeatureID, indexCount++);
+                    if(DEBUG && !(objectDataPair.second.toString()).equals("0")) meaningfulFeatureCount++;
                 }
             }
+
+            /* Handle second part -> Add current class label to set */
+            final String classLabel = dataPair.second;
+            classLabels.add(classLabel);
         }
 
-//        Log.e("supdawg", "convertDataObjectToInstances: " + featureColumnIndex.size());
+        /* remove the unknown label from class values, it is meant to be implicit */
+        classLabels.remove(ScanService.CLASS_UNKNOWN);
 
-        List<Instance> instanceList = new ArrayList<>();
-        for (DataPair<DataObject, String> dataPair : dataWithLabels) {
-            final String currLabel = dataPair.second;
+        /** By now, we have fully filled out :
+         * @classLabels : contains all the label values, which are unique
+         * @featureColumnIndex : essentially a list of columns
+         */
+
+        if(DEBUG)
+        {
+            for (String name : featureColumnIndex.keySet())
+            {
+                final String value = featureColumnIndex.get(name).toString();
+                Log.d(TAG, "feature[" + value + "] : " + name);
+            }
+            Log.d(TAG, "Classifier contains " + featureColumnIndex.size() + " unique features, out of which " + meaningfulFeatureCount + " appear meaningful");
+        }
+
+        /** Since we already know all the columns, we can create an Instances object, with empty structure to formalize our Classifier structure
+         * Step 1: create an attribute list of features
+         * Step 2: Prepare class attribute & add it to end of attribute list
+         * Step 3: pass attribute list and set instances class index
+         * Step 4: print Instances for #sanity
+         * */
+
+        /* Step 1 */
+        ArrayList<Attribute> featureAttrList = new ArrayList<>();
+        for (final String uniqueFeatureID : featureColumnIndex.keySet())
+        {
+            final Attribute uniqueAttribute = new Attribute(uniqueFeatureID);
+            featureAttrList.add(uniqueAttribute);
+        }
+
+        /* Step 2 */
+        final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<> (classLabels));
+        if(DEBUG) Log.e(TAG, classifierName +":"+ classAttribute.toString());
+        featureAttrList.add(classAttribute);
+
+        /* Step 3 */
+        Instances dataInstances = new Instances(classifierName, featureAttrList, 0);
+        dataInstances.setClass(classAttribute);
+
+        /* Step 4 */
+        if(DEBUG) System.err.println(dataInstances.toSummaryString());
+
+
+        /** -------------------------------------------------------------------------------------**/
+
+
+        /** Next, we will populate a row using data timestamp, @featureColumnIndex and @dataWithLabels
+         * Step 5: Create a model empty instance (with all missing values) -> '?' and structure set to dataInstances
+         * Step 6:
+         * Step 7: Iterate over the timestamp array, get all instances, and store it to our @dataInstances set.
+         * **/
+
+        /* Step 6 */
+        HashMap<Long, Instance> timestampMap = new HashMap<>();
+
+        for(final DataPair<DataObject, String> dataPair : dataWithLabels)
+        {
+            final String label = (dataPair.second);
             final Long timestamp = dataPair.first.mTimeStamp;
-            final String feat_prefix = dataPair.first.mID;
-            Collection<String> keys = new HashSet<>(featureColumnIndex.keySet());
-            final int numColumns = keys.size();
-            Instance instance = new DenseInstance(numColumns);
+            final List<DataPair> dataObjectVals = dataPair.first.mDataVals;
 
-            addToInstance(instance, featureColumnIndex.get(ATTRIBUTE_TIMESTAMP), timestamp);
-            keys.remove(ATTRIBUTE_TIMESTAMP);
+            /* Step 5 */
+            /* gets previously stored instance @ given timestamp : falls back to empty instance if no instance exists @ timestamp */
 
-//            addToInstance(instance, featureColumnIndex.get(ATTRIBUTE_CLASS), currLabel);
-//            keys.remove(ATTRIBUTE_CLASS);
+            Instance previouslyStoredInstance = timestampMap.get(timestamp);
 
-            for (DataPair<String, Object> dataValPair : dataPair.first.mDataVals) {
-
+            if(previouslyStoredInstance == null)
+            {
+                previouslyStoredInstance = new DenseInstance(featureAttrList.size());
+                previouslyStoredInstance.setDataset(dataInstances);
             }
 
+            /* update the class attribute value, or set to missing if it's equal to ScanService Unknown label */
+            if(label.equals(ScanService.CLASS_UNKNOWN))
+            {
+                previouslyStoredInstance.setClassMissing();
+            }
+            else
+            {
+                previouslyStoredInstance.setClassValue(label);
+            }
+
+
+            /* for every key, value pair here, generate it as an attribute and update it on our @previouslyStoredInstance */
+            for(final DataPair dataVal : dataObjectVals)
+            {
+
+                final String dataAttributeID = DataObject.concatFeatureID(dataPair.first.mID, (String) dataVal.first);
+                final Integer index = featureColumnIndex.get(dataAttributeID);
+
+                if(index < 0)
+                {
+                    Log.e(TAG, "Error: Cannot find attribute index " + dataAttributeID);
+                    continue;
+                }
+
+                final Object value = dataVal.second;
+                if(value instanceof Integer)
+                {
+                    previouslyStoredInstance.setValue(index, ((Integer) value).doubleValue());
+                }
+                else if(value instanceof Float)
+                {
+                    previouslyStoredInstance.setValue(index, ((Float) value).doubleValue());
+                }
+                else if(value instanceof Double)
+                {
+                    previouslyStoredInstance.setValue(index, (Double) value);
+                }
+                else if(value instanceof String)
+                {
+                    previouslyStoredInstance.setValue(index, (String) value);
+                }
+                else
+                {
+                    Log.e(TAG, "Error: Cannot cast to meaningful type Object :" + value.toString());
+                }
+            }
+
+            /* store this fucker in the hashmap, this lets it get further updated if there is another timestamp with more attributes */
+            timestampMap.put(timestamp, previouslyStoredInstance);
         }
 
-        // TODO: populate instance list using featureColumnIndex HashMap
-
-        ArrayList<Attribute> attributeList = new ArrayList<>();
-        for (String featureName : featureColumnIndex.keySet()) {
-            attributeList.add(new Attribute(featureName));
-        }
-
-
-        Instances dataInstances = new Instances(classifierName, attributeList, 0);
-        dataInstances.addAll(instanceList);
-
-        dataInstances.setClassIndex(featureColumnIndex.get(ATTRIBUTE_CLASS));
-
-
-        return null;
+        /* Step 7 */
+        dataInstances.addAll(timestampMap.values());
+        return dataInstances;
     }
 
     @Override
@@ -143,17 +250,7 @@ public class DataObjectClassifier implements Serializable{
                 ", classifier=" + classifier +
                 '}';
     }
-//    public void updateClassifier(final Instances newInstances) {
-//        for(final Instance instance : newInstances) {
-//            try {
-//                this.classifier.updateClassifier(instance);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-////        ((weka.classifiers.Classifier) this.classifier).distributionForInstance();
-//    }
-//
+
     private static weka.classifiers.Classifier buildClassifier(final Instances structure) {
         NaiveBayesUpdateable naiveBayesUpdateable = new NaiveBayesUpdateable();
         try {
@@ -172,7 +269,24 @@ public class DataObjectClassifier implements Serializable{
             e.printStackTrace();
             return null;
         }
+        if(DEBUG) System.err.println(naiveBayesUpdateable.toString());
         return naiveBayesUpdateable;
+    }
+
+    private boolean InstancesToArff(final Instances dataSet) {
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(dataSet);
+        try {
+            final File outputArff = new File(FS_rootDirectory + "/" + this.mClassifierName + ".arff.gz");
+            saver.setCompressOutput(true);
+            saver.setFile(outputArff);
+            saver.writeBatch();
+            Log.i(TAG, "Saved raw-arff data to:" + outputArff.getAbsolutePath());
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

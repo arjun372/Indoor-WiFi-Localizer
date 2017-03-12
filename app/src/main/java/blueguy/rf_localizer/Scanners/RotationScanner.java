@@ -61,10 +61,10 @@ public class RotationScanner extends Scanner implements SensorEventListener {
         final String sensorType = "rot_vect";
         final Long timestamp = event.timestamp;
 
-        List<DataPair<String, Object>> features = new ArrayList<>();
-        features.add(new DataPair<String, Object>("x", event.values[0]));
-        features.add(new DataPair<String, Object>("y", event.values[1]));
-        features.add(new DataPair<String, Object>("z", event.values[2]));
+        List<DataPair> features = new ArrayList<>();
+        features.add(new DataPair<>("x", event.values[0]));
+        features.add(new DataPair<>("y", event.values[1]));
+        features.add(new DataPair<>("z", event.values[2]));
 
         final DataObject sensorData = new DataObject(timestamp, sensorType, features);
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));

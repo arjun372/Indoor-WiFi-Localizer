@@ -32,10 +32,11 @@ public class ScanService extends Service {
     private static final String TAG = "ScanService";
     private static final String CALLBACK = "ScanCallback";
     public static final String TAG_LOCATION = "location";
-//    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
 
     private static final String KEY_TIMESTAMP = "timestamp";
-    private static final String VAL_UNKNOWN = "?";
+
+    private static final String MAP_UNKNOWN = "nowhere";
+    public static final String CLASS_UNKNOWN = "here";
 
 
     // TODO: Remove mDataBase HashMap
@@ -59,9 +60,9 @@ public class ScanService extends Service {
     private DataObjectClassifier mCurrDataObjectClassifier = null;
 
     private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
-    private String mCurrLabel = VAL_UNKNOWN;
+    private String mCurrLabel = CLASS_UNKNOWN;
 
-    private String mLocation = VAL_UNKNOWN;
+    private String mLocation = MAP_UNKNOWN;
 
     public void setCurrLabel(String newCurrLabel) {
         mCurrLabel = newCurrLabel;
@@ -69,7 +70,7 @@ public class ScanService extends Service {
     }
 
     public void resetCurrLabel() {
-        setCurrLabel(VAL_UNKNOWN);
+        setCurrLabel(CLASS_UNKNOWN);
     }
 
     private void setupCurrLocation(String location) {
@@ -172,11 +173,14 @@ public class ScanService extends Service {
     private ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(final List<DataObject> dataList) {
-            if (mAccumulatedDataAndLabels == null) {
+            if (mAccumulatedDataAndLabels == null)
+            {
                 mAccumulatedDataAndLabels = new ArrayList<>();
             }
-            for (final DataObject dataObject : dataList) {
-                mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, mCurrLabel));
+            for (final DataObject dataObject : dataList)
+            {
+                final String current_label = String.valueOf(mCurrLabel);
+                mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, current_label));
             }
         }
     };

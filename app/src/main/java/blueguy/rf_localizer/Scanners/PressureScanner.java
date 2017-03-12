@@ -61,8 +61,8 @@ public class PressureScanner extends Scanner implements SensorEventListener {
         final String sensorType = "baro";
         final Long timestamp = event.timestamp;
 
-        List<DataPair<String, Object>> features = new ArrayList<>();
-        features.add(new DataPair<String, Object>("p", event.values[0]));
+        List<DataPair> features = new ArrayList<>();
+        features.add(new DataPair<>("p", event.values[0]));
 
         final DataObject sensorData = new DataObject(timestamp, sensorType, features);
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));

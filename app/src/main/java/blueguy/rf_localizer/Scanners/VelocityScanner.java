@@ -61,9 +61,7 @@ public class VelocityScanner extends Scanner implements SensorEventListener {
         final Long timestamp = event.timestamp;
         final double velocity = getMagnitude(event.values);
 
-//        Log.d(TAG, timestamp + ", " + sensorType + ", " + velocity);
-
-        DataPair<String, Object> gyro_a = new DataPair<String, Object>("a", velocity);
+        final DataPair gyro_a = new DataPair<>("a", velocity);
         final DataObject sensorData = new DataObject(timestamp, sensorType, Collections.singletonList(gyro_a));
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));
         mScannerCallback.onScanResult(updatedEntries);

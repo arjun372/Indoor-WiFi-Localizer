@@ -112,14 +112,14 @@ public class CellScanner extends Scanner {
                 final NeighboringCellInfo info = (NeighboringCellInfo) singleCellInfo;
                 identity = String.valueOf(info.getCid());
                 asu_lvl = info.getRssi();
-                dbm = -113 + (2*asu_lvl);
+                dbm = -113 + (2 * asu_lvl);
             }
 
             if(singleCellInfo instanceof CellInfoWcdma)
             {
                 final CellInfoWcdma info = (CellInfoWcdma) singleCellInfo;
                 timestamp = (info.getTimeStamp() / 1000000);
-                identity = info.getCellIdentity().toString();
+                identity = String.valueOf(info.getCellIdentity().getCid());
 
                 dbm = info.getCellSignalStrength().getDbm();
                 lvl = info.getCellSignalStrength().getLevel();
@@ -130,7 +130,7 @@ public class CellScanner extends Scanner {
             {
                 CellInfoCdma info = (CellInfoCdma) singleCellInfo;
                 timestamp = (info.getTimeStamp() / 1000000);
-                identity = info.getCellIdentity().toString();
+                identity = String.valueOf(info.getCellIdentity().getBasestationId());
 
                 dbm = info.getCellSignalStrength().getDbm();
                 lvl = info.getCellSignalStrength().getLevel();
@@ -150,7 +150,7 @@ public class CellScanner extends Scanner {
             {
                 CellInfoLte info = (CellInfoLte) singleCellInfo;
                 timestamp = (info.getTimeStamp() / 1000000);
-                identity = info.getCellIdentity().toString();
+                identity = String.valueOf(info.getCellIdentity().getCi());
 
                 dbm = info.getCellSignalStrength().getDbm();
                 lvl = info.getCellSignalStrength().getLevel();
@@ -163,29 +163,29 @@ public class CellScanner extends Scanner {
             {
                 CellInfoGsm info = (CellInfoGsm) singleCellInfo;
                 timestamp = (info.getTimeStamp() / 1000000);
-                identity = info.getCellIdentity().toString();
+                identity = String.valueOf(info.getCellIdentity().getCid());
 
                 dbm = info.getCellSignalStrength().getDbm();
                 lvl = info.getCellSignalStrength().getLevel();
                 asu_lvl = info.getCellSignalStrength().getAsuLevel();
             }
 
-            List<DataPair<String, Object>> dataVector = new ArrayList<>();
+            List<DataPair> dataVector = new ArrayList<>();
 
-            dataVector.add(new DataPair<String, Object>("dbm", dbm));
-            dataVector.add(new DataPair<String, Object>("asu_lvl", asu_lvl));
-            dataVector.add(new DataPair<String, Object>("lvl", lvl));
+            dataVector.add(new DataPair<>("dbm", dbm));
+            dataVector.add(new DataPair<>("asu_lvl", asu_lvl));
+            dataVector.add(new DataPair<>("lvl", lvl));
 
-            dataVector.add(new DataPair<String, Object>("cdma_dbm", cdma_dbm));
-            dataVector.add(new DataPair<String, Object>("cdma_lvl", cdma_lvl));
+            dataVector.add(new DataPair<>("cdma_dbm", cdma_dbm));
+            dataVector.add(new DataPair<>("cdma_lvl", cdma_lvl));
             dataVector.add(new DataPair<String, Object>("cdma_ecio", cdma_ecio));
 
-            dataVector.add(new DataPair<String, Object>("evdo_dbm", evdo_dbm));
-            dataVector.add(new DataPair<String, Object>("evdo_lvl", evdo_lvl));
-            dataVector.add(new DataPair<String, Object>("evdo_ecio", evdo_ecio));
-            dataVector.add(new DataPair<String, Object>("evdo_snr", evdo_snr));
+            dataVector.add(new DataPair<>("evdo_dbm", evdo_dbm));
+            dataVector.add(new DataPair<>("evdo_lvl", evdo_lvl));
+            dataVector.add(new DataPair<>("evdo_ecio", evdo_ecio));
+            dataVector.add(new DataPair<>("evdo_snr", evdo_snr));
 
-            dataVector.add(new DataPair<String, Object>("timing_adv", timing_advance));
+            dataVector.add(new DataPair<>("timing_adv", timing_advance));
 
             final DataObject newCellTower = new DataObject(timestamp, identity, dataVector);
             newCellTowers.add(newCellTower);
