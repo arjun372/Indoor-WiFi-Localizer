@@ -191,14 +191,14 @@ public class ScanService extends Service {
 
         curScanners.add(new WifiScanner(mScannerCallback));
         curScanners.add(new CellScanner(mScannerCallback));
-        curScanners.add(new BluetoothScanner(mScannerCallback));
-        curScanners.add(new VelocityScanner(mScannerCallback));
-        curScanners.add(new RotationScanner(mScannerCallback));
-        curScanners.add(new MagneticFieldScanner(mScannerCallback));
-        curScanners.add(new PressureScanner(mScannerCallback));
+        //curScanners.add(new BluetoothScanner(mScannerCallback));
+        //curScanners.add(new VelocityScanner(mScannerCallback));
+        //curScanners.add(new RotationScanner(mScannerCallback));
+        //curScanners.add(new MagneticFieldScanner(mScannerCallback));
+        //curScanners.add(new PressureScanner(mScannerCallback));
 
-//        curScanners.add(new AltitudeScanner(mScannerCallback));
-        for(Scanner scanner : curScanners) {
+        for(final Scanner scanner : curScanners)
+        {
             scanner.startScan();
         }
 

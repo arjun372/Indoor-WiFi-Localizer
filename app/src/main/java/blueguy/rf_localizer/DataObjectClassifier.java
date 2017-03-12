@@ -82,10 +82,9 @@ public class DataObjectClassifier implements Serializable{
 
     public static Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels, final String classifierName) {
 
-        HashMap<String, Integer> featureColumnIndex = new HashMap<>();
+        HashMap<String, Attribute> featureHash = new HashMap<>();
         HashSet<String> classLabels = new HashSet<>();
 
-        int indexCount = 0;
         int meaningfulFeatureCount = 0;
 
         for (final DataPair<DataObject, String> dataPair : dataWithLabels) {
@@ -101,10 +100,12 @@ public class DataObjectClassifier implements Serializable{
                 final String keyName = (String) objectDataPair.first;
                 final String uniqueFeatureID = DataObject.concatFeatureID(dataObjectID, keyName);
 
-                if (!featureColumnIndex.containsKey(uniqueFeatureID)) {
-                    featureColumnIndex.put(uniqueFeatureID, indexCount++);
+                if(!featureHash.containsKey(uniqueFeatureID))
+                {
+                    featureHash.put(uniqueFeatureID, new Attribute(uniqueFeatureID));
                     if(DEBUG && !(objectDataPair.second.toString()).equals("0")) meaningfulFeatureCount++;
                 }
+
             }
 
             /* Handle second part -> Add current class label to set */
@@ -122,12 +123,12 @@ public class DataObjectClassifier implements Serializable{
 
         if(DEBUG)
         {
-            for (String name : featureColumnIndex.keySet())
+            for (String name : featureHash.keySet())
             {
-                final String value = featureColumnIndex.get(name).toString();
+                final String value = featureHash.get(name).toString();
                 Log.d(TAG, "feature[" + value + "] : " + name);
             }
-            Log.d(TAG, "Classifier contains " + featureColumnIndex.size() + " unique features, out of which " + meaningfulFeatureCount + " appear meaningful");
+            Log.d(TAG, "Classifier contains " + featureHash.size() + " unique features, out of which " + (meaningfulFeatureCount - 1) + " appear meaningful");
         }
 
         /** Since we already know all the columns, we can create an Instances object, with empty structure to formalize our Classifier structure
@@ -138,19 +139,21 @@ public class DataObjectClassifier implements Serializable{
          * */
 
         /* Step 1 */
-        ArrayList<Attribute> featureAttrList = new ArrayList<>();
-        for (final String uniqueFeatureID : featureColumnIndex.keySet())
-        {
-            final Attribute uniqueAttribute = new Attribute(uniqueFeatureID);
-            featureAttrList.add(uniqueAttribute);
-        }
+//        for (final String uniqueFeatureID : featureColumnIndex.keySet())
+//        {
+//            final Attribute uniqueAttribute = new Attribute(uniqueFeatureID);
+//            featureAttrList.add(uniqueAttribute);
+//        }
 
         /* Step 2 */
-        final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<> (classLabels));
+        final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<>(classLabels));
         if(DEBUG) Log.e(TAG, classifierName +":"+ classAttribute.toString());
-        featureAttrList.add(classAttribute);
+        featureHash.put(ATTRIBUTE_CLASS, classAttribute);
+
+        //featureAttrList.add(classAttribute);
 
         /* Step 3 */
+        final ArrayList<Attribute> featureAttrList = new ArrayList<> (featureHash.values());
         Instances dataInstances = new Instances(classifierName, featureAttrList, 0);
         dataInstances.setClass(classAttribute);
 
@@ -197,36 +200,36 @@ public class DataObjectClassifier implements Serializable{
                 previouslyStoredInstance.setClassValue(label);
             }
 
-
             /* for every key, value pair here, generate it as an attribute and update it on our @previouslyStoredInstance */
             for(final DataPair dataVal : dataObjectVals)
             {
-
+                final Object value = dataVal.second;
                 final String dataAttributeID = DataObject.concatFeatureID(dataPair.first.mID, (String) dataVal.first);
-                final Integer index = featureColumnIndex.get(dataAttributeID);
+                final Attribute uniqueAttribute = featureHash.get(dataAttributeID);
 
-                if(index < 0)
+                if(uniqueAttribute == null)
                 {
                     Log.e(TAG, "Error: Cannot find attribute index " + dataAttributeID);
                     continue;
                 }
 
-                final Object value = dataVal.second;
+                Log.e(TAG, "Updating attribute :: " + dataAttributeID + " @ column :" + uniqueAttribute.toString());
+
                 if(value instanceof Integer)
                 {
-                    previouslyStoredInstance.setValue(index, ((Integer) value).doubleValue());
+                    previouslyStoredInstance.setValue(uniqueAttribute, ((Integer) value).doubleValue());
                 }
                 else if(value instanceof Float)
                 {
-                    previouslyStoredInstance.setValue(index, ((Float) value).doubleValue());
+                    previouslyStoredInstance.setValue(uniqueAttribute, ((Float) value).doubleValue());
                 }
                 else if(value instanceof Double)
                 {
-                    previouslyStoredInstance.setValue(index, (Double) value);
+                    previouslyStoredInstance.setValue(uniqueAttribute, (Double) value);
                 }
                 else if(value instanceof String)
                 {
-                    previouslyStoredInstance.setValue(index, (String) value);
+                    previouslyStoredInstance.setValue(uniqueAttribute, (String) value);
                 }
                 else
                 {
