@@ -63,6 +63,7 @@ public class MagneticFieldScanner extends Scanner implements SensorEventListener
         final Long timestamp = event.timestamp;
 
         List<DataPair> features = new ArrayList<>();
+        features.add(new DataPair<>("a", getMagnitude(event.values)));
         features.add(new DataPair<>("x", event.values[0]));
         features.add(new DataPair<>("y", event.values[1]));
         features.add(new DataPair<>("z", event.values[2]));
@@ -70,6 +71,10 @@ public class MagneticFieldScanner extends Scanner implements SensorEventListener
         final DataObject sensorData = new DataObject(timestamp, sensorType, features);
         final List<DataObject> updatedEntries = updateStaleEntries(Collections.singletonList(sensorData));
         mScannerCallback.onScanResult(updatedEntries);
+    }
+
+    private static double getMagnitude(final float[] a) {
+        return Math.hypot(Math.hypot(a[0] , a[1]), a[2]);
     }
 
     @Override

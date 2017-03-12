@@ -1,13 +1,20 @@
 package blueguy.rf_localizer;
 
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.util.Collections;
+import java.util.Map;
 
 
 /**
@@ -18,7 +25,32 @@ import android.widget.TextView;
 public class Fragment_PredictingScreen extends Fragment {
     private static final String KEY_LOCATION = "location";
 
-    private String mCurrLocation = "";
+    private Handler mPredictionRequestHandler = new Handler();
+
+    private static final Long predictionTimeoutHistoryMs = 10000L;
+
+    private static final long[] vibrationPattern = new long[] {500L, 500L, 500L, 500L};
+
+    private Runnable mPredictionRequest = new Runnable() {
+        @Override
+        public void run() {
+            final Long now = System.currentTimeMillis();
+            final Long past = now - predictionTimeoutHistoryMs;
+            final Map<String, Double> distributions = ((MainActivity)getActivity()).mScanService.predictOnData(past, now);
+
+            final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
+            predictLabelTextView.setText(predictedLabel);
+
+            Vibrator vibrateOnPredict = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrateOnPredict.vibrate(vibrationPattern, -1);
+
+            mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+        }
+    };
+
+    private TextView predictLabelTextView;
+
+    private String mCurrLocation;
 
     public Fragment_PredictingScreen() {
         // Required empty public constructor
@@ -73,10 +105,23 @@ public class Fragment_PredictingScreen extends Fragment {
 
 
         // TODO: Update this label as necessary according to the ScanService predictions
-        TextView predictLabelTextView = (TextView) rootView.findViewById(R.id.predicting_label_text);
+        predictLabelTextView = (TextView) rootView.findViewById(R.id.predicting_label_text);
         
 
         return rootView;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((MainActivity)getActivity()).mScanService.resetCurrLabel();
+        mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        predictLabelTextView.setText("Calculating...");
+        mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+    }
 }

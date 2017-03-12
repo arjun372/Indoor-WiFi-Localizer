@@ -5,24 +5,18 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.Pair;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import blueguy.rf_localizer.Scanners.BluetoothScanner;
 import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
-import blueguy.rf_localizer.Scanners.MagneticFieldScanner;
-import blueguy.rf_localizer.Scanners.PressureScanner;
-import blueguy.rf_localizer.Scanners.RotationScanner;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
-import blueguy.rf_localizer.Scanners.VelocityScanner;
 import blueguy.rf_localizer.Scanners.WifiScanner;
 import blueguy.rf_localizer.utils.DataPair;
 import blueguy.rf_localizer.utils.PersistentMemoryManager;
@@ -79,7 +73,7 @@ public class ScanService extends Service {
 
         try {
             mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(this, mLocation);
-            mAccumulatedDataAndLabels = mCurrDataObjectClassifier.getLabeled_data();
+            mAccumulatedDataAndLabels = mCurrDataObjectClassifier.getRawData();
             Log.e(TAG, "successfully loaded mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
 //            printList(mAccumulatedDataAndLabels);
         } catch (IOException | ClassNotFoundException e) {
@@ -97,10 +91,6 @@ public class ScanService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public String predictOnData(long timeStart, long timeEnd) {
-        return "lol";
     }
 
     private static void printList(final List<DataPair<DataObject, String>> data) {
@@ -238,6 +228,16 @@ public class ScanService extends Service {
         }
 
         return START_NOT_STICKY;
+    }
+
+    public Map<String, Double> predictOnData(long timeStart, long timeEnd) {
+
+        if(mCurrDataObjectClassifier == null)
+        {
+            trainClassifier();
+        }
+
+        return mCurrDataObjectClassifier.classify(mAccumulatedDataAndLabels);
     }
 }
 

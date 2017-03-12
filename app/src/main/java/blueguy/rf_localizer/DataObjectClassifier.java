@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
@@ -30,31 +33,39 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
 public class DataObjectClassifier implements Serializable{
 
     private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
-
     private static final String TAG = DataObjectClassifier.class.getSimpleName();
-
-    private static final long serialVersionUID = 3L;
-
-    private List<DataPair<DataObject, String>> labeled_data;
-    private Classifier classifier;
-    private String mClassifierName;
 
     private static final String ATTRIBUTE_CLASS = "class";
 
-    public List<DataPair<DataObject, String>> getLabeled_data() {
-        return labeled_data;
+    private static final long serialVersionUID = 3L;
+
+    private HashMap<String, Attribute> mFeatureSet = new HashMap<>();
+
+    private List<DataPair<DataObject, String>> mLabeledRawData;
+
+    private HashSet<String> mClassLabels = new HashSet<>();
+
+    private String mClassifierName;
+
+    private Classifier mClassifier;
+
+
+
+    public List<DataPair<DataObject, String>> getRawData() {
+        return mLabeledRawData;
     }
 
     public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, String locationName) {
 
         /* save data for future use */
-        final Instances dataInstances = convertDataObjectToInstances(dataWithLabels, locationName);
-        this.classifier = buildClassifier(dataInstances);
-        this.labeled_data = dataWithLabels;
-        this.mClassifierName = locationName;
+        this.mClassifierName = locationName.trim().replaceAll(" ", "");
+        this.mLabeledRawData = dataWithLabels;
 
-        /* save instances to arff for inspection */
-        InstancesToArff(dataInstances);
+        final Instances dataInstances = convertDataObjectToInstances(dataWithLabels);
+        this.mClassifier = buildClassifier(dataInstances);
+
+        /* save instances to arff for inspection with weka GUI */
+        if(DEBUG) InstancesToArff(dataInstances);
     }
 
     /**
@@ -62,9 +73,39 @@ public class DataObjectClassifier implements Serializable{
      * @param data
      * @return
      */
-    public List<DataPair<String, Double>> classify(final List<DataObject> data) {
+    public Map<String, Double> classify(List<DataPair<DataObject, String>> data) {
 
-        return new ArrayList<>();
+        /** create a list of data with unknown labels **/
+        data.forEach(single -> single.second = ScanService.CLASS_UNKNOWN);
+
+        final Instances toPredictOn = convertDataObjectToInstances(data);
+
+        /** create an accumulator map with size equal to @mClassLabels, and set it to zero **/
+        ArrayList<Double> accumulatedDistributions = new ArrayList<>();
+        mClassLabels.forEach(eachLabel -> accumulatedDistributions.add(0.0));
+
+        /** classify with current classifier **/
+        for(final Instance singleInstance : toPredictOn)
+        {
+            try {
+                final double[] distributions = mClassifier.distributionForInstance(singleInstance);
+                for(int i = 0; i < distributions.length; i++)
+                {
+                    accumulatedDistributions.set(i, accumulatedDistributions.get(i) + distributions[i]);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to classify instance");
+                e.printStackTrace();
+                continue;
+            }
+
+        }
+
+        /** calculate the mean **/
+        final int numInstances = toPredictOn.numInstances();
+        accumulatedDistributions.forEach(classValue->classValue/=numInstances);
+
+        return zipToMap(new ArrayList<>(mClassLabels), accumulatedDistributions);
     }
 
     /**
@@ -76,14 +117,11 @@ public class DataObjectClassifier implements Serializable{
         return new ArrayList<>();
     }
 
-    private static void addToInstance(Instance instance, int attributeIndex, Long value) {
-
+    private static <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
+        return IntStream.range(0, keys.size()).boxed().collect(Collectors.toMap(keys::get, values::get));
     }
 
-    public static Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels, final String classifierName) {
-
-        HashMap<String, Attribute> featureHash = new HashMap<>();
-        HashSet<String> classLabels = new HashSet<>();
+    private Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels) {
 
         int meaningfulFeatureCount = 0;
 
@@ -100,9 +138,9 @@ public class DataObjectClassifier implements Serializable{
                 final String keyName = (String) objectDataPair.first;
                 final String uniqueFeatureID = DataObject.concatFeatureID(dataObjectID, keyName);
 
-                if(!featureHash.containsKey(uniqueFeatureID))
+                if(!mFeatureSet.containsKey(uniqueFeatureID))
                 {
-                    featureHash.put(uniqueFeatureID, new Attribute(uniqueFeatureID));
+                    mFeatureSet.put(uniqueFeatureID, new Attribute(uniqueFeatureID));
                     if(DEBUG && !(objectDataPair.second.toString()).equals("0")) meaningfulFeatureCount++;
                 }
 
@@ -110,11 +148,11 @@ public class DataObjectClassifier implements Serializable{
 
             /* Handle second part -> Add current class label to set */
             final String classLabel = dataPair.second;
-            classLabels.add(classLabel);
+            mClassLabels.add(classLabel);
         }
 
         /* remove the unknown label from class values, it is meant to be implicit */
-        classLabels.remove(ScanService.CLASS_UNKNOWN);
+        mClassLabels.remove(ScanService.CLASS_UNKNOWN);
 
         /** By now, we have fully filled out :
          * @classLabels : contains all the label values, which are unique
@@ -123,12 +161,12 @@ public class DataObjectClassifier implements Serializable{
 
         if(DEBUG)
         {
-            for (String name : featureHash.keySet())
+            for (String name : mFeatureSet.keySet())
             {
-                final String value = featureHash.get(name).toString();
+                final String value = mFeatureSet.get(name).toString();
                 Log.d(TAG, "feature[" + value + "] : " + name);
             }
-            Log.d(TAG, "Classifier contains " + featureHash.size() + " unique features, out of which " + (meaningfulFeatureCount - 1) + " appear meaningful");
+            Log.d(TAG, "Classifier contains " + mFeatureSet.size() + " unique features, out of which " + (meaningfulFeatureCount - 1) + " appear meaningful");
         }
 
         /** Since we already know all the columns, we can create an Instances object, with empty structure to formalize our Classifier structure
@@ -146,15 +184,15 @@ public class DataObjectClassifier implements Serializable{
 //        }
 
         /* Step 2 */
-        final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<>(classLabels));
-        if(DEBUG) Log.e(TAG, classifierName +":"+ classAttribute.toString());
-        featureHash.put(ATTRIBUTE_CLASS, classAttribute);
+        final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<>(mClassLabels));
+        if(DEBUG) Log.e(TAG, mClassifierName +":"+ classAttribute.toString());
+        mFeatureSet.put(ATTRIBUTE_CLASS, classAttribute);
 
         //featureAttrList.add(classAttribute);
 
         /* Step 3 */
-        final ArrayList<Attribute> featureAttrList = new ArrayList<> (featureHash.values());
-        Instances dataInstances = new Instances(classifierName, featureAttrList, 0);
+        final ArrayList<Attribute> featureAttrList = new ArrayList<> (mFeatureSet.values());
+        Instances dataInstances = new Instances(mClassifierName, featureAttrList, 0);
         dataInstances.setClass(classAttribute);
 
         /* Step 4 */
@@ -205,7 +243,7 @@ public class DataObjectClassifier implements Serializable{
             {
                 final Object value = dataVal.second;
                 final String dataAttributeID = DataObject.concatFeatureID(dataPair.first.mID, (String) dataVal.first);
-                final Attribute uniqueAttribute = featureHash.get(dataAttributeID);
+                final Attribute uniqueAttribute = mFeatureSet.get(dataAttributeID);
 
                 if(uniqueAttribute == null)
                 {
@@ -249,8 +287,8 @@ public class DataObjectClassifier implements Serializable{
     @Override
     public String toString() {
         return "DataObjectClassifier{" +
-                "labeled_data=" + labeled_data +
-                ", classifier=" + classifier +
+                "mLabeledRawData=" + mLabeledRawData +
+                ", mClassifier=" + mClassifier +
                 '}';
     }
 
@@ -258,14 +296,14 @@ public class DataObjectClassifier implements Serializable{
         NaiveBayesUpdateable naiveBayesUpdateable = new NaiveBayesUpdateable();
         try {
 
-            /* set classifier properties */
+            /* set mClassifier properties */
             naiveBayesUpdateable.setUseSupervisedDiscretization(false);
             naiveBayesUpdateable.setDisplayModelInOldFormat(false);
             naiveBayesUpdateable.setUseKernelEstimator(false);
             //naiveBayesUpdateable.setOptions(options);
             naiveBayesUpdateable.setDebug(DEBUG);
 
-            /* build classifier with given instances */
+            /* build mClassifier with given instances */
             naiveBayesUpdateable.buildClassifier(structure);
 
         } catch (Exception e) {
