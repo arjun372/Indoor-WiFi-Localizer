@@ -60,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void bindScanService(String location) {
+    public void bindScanService(final String location, final boolean train) {
         Intent intent = new Intent(this, ScanService.class);
         intent.putExtra(ScanService.TAG_LOCATION, location);
+        intent.putExtra(ScanService.TAG_TRAIN_ACTION, train);
         bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 

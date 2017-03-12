@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +49,6 @@ public class DataObjectClassifier implements Serializable{
     private String mClassifierName;
 
     private Classifier mClassifier;
-
 
 
     public List<DataPair<DataObject, String>> getRawData() {
@@ -103,7 +103,8 @@ public class DataObjectClassifier implements Serializable{
 
         /** calculate the mean **/
         final int numInstances = toPredictOn.numInstances();
-        accumulatedDistributions.forEach(classValue->classValue/=numInstances);
+        Log.e(TAG, "Instances: "+numInstances+", Distributions :" + accumulatedDistributions);
+        accumulatedDistributions.forEach(classValue->classValue=classValue/=numInstances);
 
         return zipToMap(new ArrayList<>(mClassLabels), accumulatedDistributions);
     }
@@ -123,6 +124,9 @@ public class DataObjectClassifier implements Serializable{
 
     private Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels) {
 
+        final boolean updateLabels = (mClassLabels.isEmpty());
+        final boolean updateFeatureSet = (mFeatureSet.isEmpty());
+
         int meaningfulFeatureCount = 0;
 
         for (final DataPair<DataObject, String> dataPair : dataWithLabels) {
@@ -138,7 +142,7 @@ public class DataObjectClassifier implements Serializable{
                 final String keyName = (String) objectDataPair.first;
                 final String uniqueFeatureID = DataObject.concatFeatureID(dataObjectID, keyName);
 
-                if(!mFeatureSet.containsKey(uniqueFeatureID))
+                if(updateFeatureSet && !mFeatureSet.containsKey(uniqueFeatureID))
                 {
                     mFeatureSet.put(uniqueFeatureID, new Attribute(uniqueFeatureID));
                     if(DEBUG && !(objectDataPair.second.toString()).equals("0")) meaningfulFeatureCount++;
@@ -146,13 +150,19 @@ public class DataObjectClassifier implements Serializable{
 
             }
 
-            /* Handle second part -> Add current class label to set */
-            final String classLabel = dataPair.second;
-            mClassLabels.add(classLabel);
+            if(updateLabels)
+            {
+                /* Handle second part -> Add current class label to set */
+                final String classLabel = dataPair.second;
+                mClassLabels.add(classLabel);
+            }
         }
 
-        /* remove the unknown label from class values, it is meant to be implicit */
-        mClassLabels.remove(ScanService.CLASS_UNKNOWN);
+        if(updateLabels) {
+            /* remove the unknown label from class values, it is meant to be implicit */
+            mClassLabels.remove(ScanService.CLASS_UNKNOWN);
+        }
+
 
         /** By now, we have fully filled out :
          * @classLabels : contains all the label values, which are unique
@@ -185,10 +195,8 @@ public class DataObjectClassifier implements Serializable{
 
         /* Step 2 */
         final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<>(mClassLabels));
-        if(DEBUG) Log.e(TAG, mClassifierName +":"+ classAttribute.toString());
+        if (DEBUG) Log.e(TAG, mClassifierName + ":" + classAttribute.toString());
         mFeatureSet.put(ATTRIBUTE_CLASS, classAttribute);
-
-        //featureAttrList.add(classAttribute);
 
         /* Step 3 */
         final ArrayList<Attribute> featureAttrList = new ArrayList<> (mFeatureSet.values());
@@ -251,7 +259,7 @@ public class DataObjectClassifier implements Serializable{
                     continue;
                 }
 
-                Log.e(TAG, "Updating attribute :: " + dataAttributeID + " @ column :" + uniqueAttribute.toString());
+                //Log.e(TAG, "Updating attribute :: " + dataAttributeID + " @ column :" + uniqueAttribute.toString());
 
                 if(value instanceof Integer)
                 {

@@ -17,13 +17,16 @@ import android.widget.Toast;
  * A simple {@link Fragment} subclass.
  */
 public class Fragment_TrainingScreen extends Fragment {
-    private static final String KEY_LOCATION = "location";
+
+    private static final String KEY_LOCATION = ScanService.TAG_LOCATION;
+    private static final String KEY_TRAIN_CLF = ScanService.TAG_TRAIN_ACTION;
 
     private String mCurrLocation = "";
 
     public static Fragment_TrainingScreen newInstance(String location) {
         Bundle bundle = new Bundle();
         bundle.putString(KEY_LOCATION, location);
+        bundle.putBoolean(KEY_TRAIN_CLF, true);
         Fragment_TrainingScreen fragment_trainingScreen = new Fragment_TrainingScreen();
         fragment_trainingScreen.setArguments(bundle);
         return fragment_trainingScreen;
@@ -37,7 +40,8 @@ public class Fragment_TrainingScreen extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrLocation = getArguments().getString(KEY_LOCATION);
-        ((MainActivity)getActivity()).bindScanService(mCurrLocation);
+        final boolean train = getArguments().getBoolean(KEY_TRAIN_CLF);
+        ((MainActivity)getActivity()).bindScanService(mCurrLocation, train);
     }
 
     @Override

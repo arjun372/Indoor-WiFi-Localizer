@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.Map;
 
+import static blueguy.rf_localizer.BuildConfig.DEBUG;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,7 +26,9 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class Fragment_PredictingScreen extends Fragment {
-    private static final String KEY_LOCATION = "location";
+
+    private static final String KEY_LOCATION = ScanService.TAG_LOCATION;
+    private static final String KEY_TRAIN_CLF = ScanService.TAG_TRAIN_ACTION;
 
     private Handler mPredictionRequestHandler = new Handler();
 
@@ -36,7 +41,15 @@ public class Fragment_PredictingScreen extends Fragment {
         public void run() {
             final Long now = System.currentTimeMillis();
             final Long past = now - predictionTimeoutHistoryMs;
-            final Map<String, Double> distributions = ((MainActivity)getActivity()).mScanService.predictOnData(past, now);
+            final Map<String, Double> distributions = ((MainActivity)getActivity()).mScanService.predictOnData(false);
+
+            if(DEBUG)
+            {
+                for(final String location : distributions.keySet())
+                {
+                    Log.d("PREDICTIONS", location + " : " + distributions.get(location));
+                }
+            }
 
             final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
             predictLabelTextView.setText(predictedLabel);
@@ -67,6 +80,7 @@ public class Fragment_PredictingScreen extends Fragment {
         Fragment_PredictingScreen fragment = new Fragment_PredictingScreen();
         Bundle args = new Bundle();
         args.putString(KEY_LOCATION, location);
+        args.putBoolean(KEY_TRAIN_CLF, false);
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,7 +89,8 @@ public class Fragment_PredictingScreen extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCurrLocation = getArguments().getString(KEY_LOCATION);
-        ((MainActivity)getActivity()).bindScanService(mCurrLocation);
+        final boolean predict = getArguments().getBoolean(KEY_TRAIN_CLF);
+        ((MainActivity)getActivity()).bindScanService(mCurrLocation, predict);
     }
 
     @Override
