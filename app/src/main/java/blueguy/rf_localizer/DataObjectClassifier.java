@@ -7,23 +7,26 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayesUpdateable;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
+import weka.filters.Filter;
+import weka.filters.supervised.instance.ClassBalancer;
 
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
@@ -78,11 +81,15 @@ public class DataObjectClassifier implements Serializable{
         /** create a list of data with unknown labels **/
         data.forEach(single -> single.second = ScanService.CLASS_UNKNOWN);
 
+        // convert list of unlabeled data to instances
         final Instances toPredictOn = convertDataObjectToInstances(data);
+        if(DEBUG) Log.d(TAG, "Classifying "+toPredictOn.numInstances()+" instances with "+data.size()+" attributes");
 
         /** create an accumulator map with size equal to @mClassLabels, and set it to zero **/
         ArrayList<Double> accumulatedDistributions = new ArrayList<>();
         mClassLabels.forEach(eachLabel -> accumulatedDistributions.add(0.0));
+
+        if(DEBUG) System.err.println(mClassifier.toString());
 
         /** classify with current classifier **/
         for(final Instance singleInstance : toPredictOn)
@@ -100,12 +107,6 @@ public class DataObjectClassifier implements Serializable{
             }
 
         }
-
-        /** calculate the mean **/
-        final int numInstances = toPredictOn.numInstances();
-        Log.e(TAG, "Instances: "+numInstances+", Distributions :" + accumulatedDistributions);
-        accumulatedDistributions.forEach(classValue->classValue=classValue/=numInstances);
-
         return zipToMap(new ArrayList<>(mClassLabels), accumulatedDistributions);
     }
 
@@ -169,15 +170,15 @@ public class DataObjectClassifier implements Serializable{
          * @featureColumnIndex : essentially a list of columns
          */
 
-        if(DEBUG)
-        {
-            for (String name : mFeatureSet.keySet())
-            {
-                final String value = mFeatureSet.get(name).toString();
-                Log.d(TAG, "feature[" + value + "] : " + name);
-            }
-            Log.d(TAG, "Classifier contains " + mFeatureSet.size() + " unique features, out of which " + (meaningfulFeatureCount - 1) + " appear meaningful");
-        }
+//        if(DEBUG)
+//        {
+//            for (String name : mFeatureSet.keySet())
+//            {
+//                final String value = mFeatureSet.get(name).toString();
+//                Log.d(TAG, "feature[" + value + "] : " + name);
+//            }
+//            Log.d(TAG, "Classifier contains " + mFeatureSet.size() + " unique features, out of which " + (meaningfulFeatureCount - 1) + " appear meaningful");
+//        }
 
         /** Since we already know all the columns, we can create an Instances object, with empty structure to formalize our Classifier structure
          * Step 1: create an attribute list of features
@@ -204,7 +205,7 @@ public class DataObjectClassifier implements Serializable{
         dataInstances.setClass(classAttribute);
 
         /* Step 4 */
-        if(DEBUG) System.err.println(dataInstances.toSummaryString());
+        //if(DEBUG) System.err.println(dataInstances.toSummaryString());
 
 
         /** -------------------------------------------------------------------------------------**/
@@ -300,26 +301,36 @@ public class DataObjectClassifier implements Serializable{
                 '}';
     }
 
-    private static weka.classifiers.Classifier buildClassifier(final Instances structure) {
-        NaiveBayesUpdateable naiveBayesUpdateable = new NaiveBayesUpdateable();
+    private static weka.classifiers.Classifier buildClassifier(Instances structure) {
+
+        if(DEBUG) Log.d(TAG, "Builiding classifier..");
+
+        /* Randomize data */
+        Log.v(TAG, "Randomizing instances");
+        structure.randomize(new Random());
+
+        /* Balance classes */
+        Log.v(TAG, "Balancing classes");
+        structure = balanceClasses(structure);
+
+        NaiveBayes naiveBayes = new NaiveBayes();
         try {
 
             /* set mClassifier properties */
-            naiveBayesUpdateable.setUseSupervisedDiscretization(false);
-            naiveBayesUpdateable.setDisplayModelInOldFormat(false);
-            naiveBayesUpdateable.setUseKernelEstimator(false);
-            //naiveBayesUpdateable.setOptions(options);
-            naiveBayesUpdateable.setDebug(DEBUG);
+            naiveBayes.setUseSupervisedDiscretization(false);
+            naiveBayes.setDisplayModelInOldFormat(false);
+            naiveBayes.setUseKernelEstimator(true);
+            //naiveBayes.setNumTrees(10);
+            naiveBayes.setDebug(DEBUG);
 
             /* build mClassifier with given instances */
-            naiveBayesUpdateable.buildClassifier(structure);
-
+            naiveBayes.buildClassifier(structure);
+            if(DEBUG) Log.e(TAG, naiveBayes.toString());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        if(DEBUG) System.err.println(naiveBayesUpdateable.toString());
-        return naiveBayesUpdateable;
+        return naiveBayes;
     }
 
     private boolean InstancesToArff(final Instances dataSet) {
@@ -336,6 +347,19 @@ public class DataObjectClassifier implements Serializable{
             e.printStackTrace();
             return false;
         }
+    }
+
+    private static Instances balanceClasses(final Instances unbalanced) {
+        Instances balanced = unbalanced;
+        ClassBalancer classBalancerFilter = new ClassBalancer();
+        classBalancerFilter.setDebug(DEBUG);
+        try {
+            classBalancerFilter.setInputFormat(unbalanced);
+            balanced = Filter.useFilter(unbalanced, classBalancerFilter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return balanced;
     }
 
 }

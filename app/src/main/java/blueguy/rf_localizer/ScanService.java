@@ -222,10 +222,6 @@ public class ScanService extends Service {
         return START_NOT_STICKY;
     }
 
-//    public Map<String, Double> predictOnData(long timeStart, long timeEnd) {
-//        return n
-//    }
-
     public Map<String, Double> predictOnData(final boolean accumulate) {
         final Map<String, Double> predictions = predict();
         if(!accumulate) mAccumulatedDataAndLabels = new ArrayList<>();

@@ -2,6 +2,7 @@ package blueguy.rf_localizer;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -14,6 +15,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.RadarChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.RadarData;
+import com.github.mikephil.charting.data.RadarDataSet;
+import com.github.mikephil.charting.data.RadarEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -32,9 +46,13 @@ public class Fragment_PredictingScreen extends Fragment {
 
     private Handler mPredictionRequestHandler = new Handler();
 
-    private static final Long predictionTimeoutHistoryMs = 10000L;
+    private static final Long predictionTimeoutHistoryMs = 30000L;
 
     private static final long[] vibrationPattern = new long[] {500L, 500L, 500L, 500L};
+
+    private RadarChart mChart;
+
+    private static final String UNKNOWN = "Calculating..";
 
     private Runnable mPredictionRequest = new Runnable() {
         @Override
@@ -42,6 +60,8 @@ public class Fragment_PredictingScreen extends Fragment {
             final Long now = System.currentTimeMillis();
             final Long past = now - predictionTimeoutHistoryMs;
             final Map<String, Double> distributions = ((MainActivity)getActivity()).mScanService.predictOnData(false);
+
+            setRadarData(distributions);
 
             if(DEBUG)
             {
@@ -52,10 +72,7 @@ public class Fragment_PredictingScreen extends Fragment {
             }
 
             final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
-            predictLabelTextView.setText(predictedLabel);
-
-            Vibrator vibrateOnPredict = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-            vibrateOnPredict.vibrate(vibrationPattern, -1);
+            updateLabel(predictedLabel);
 
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
         }
@@ -104,7 +121,9 @@ public class Fragment_PredictingScreen extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_predicting_screen, container, false);
+        mChart = (RadarChart) rootView.findViewById(R.id.chart1);
 
+        initRadarChart();
 
         TextView predictingLocationTextView = (TextView) rootView.findViewById(R.id.predicting_screen_location_text_view);
         predictingLocationTextView.setText(getArguments().getString(KEY_LOCATION));
@@ -136,7 +155,104 @@ public class Fragment_PredictingScreen extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        predictLabelTextView.setText("Calculating...");
+        updateLabel(UNKNOWN);
         mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+    }
+
+    private void initRadarChart() {
+
+        //mChart.setBackgroundColor(Color.rgb(60, 65, 82));
+        mChart.getDescription().setEnabled(false);
+        mChart.setWebLineWidth(2f);
+        mChart.setWebColor(Color.DKGRAY);
+        mChart.setWebLineWidthInner(1.5f);
+        mChart.setWebColorInner(Color.DKGRAY);
+        mChart.setWebAlpha(100);
+
+        mChart.animateXY(1400, 1400, Easing.EasingOption.EaseInOutQuad, Easing.EasingOption.EaseInOutQuad);
+
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setTextColor(Color.BLACK);
+        xAxis.setTextSize(9f);
+        xAxis.setYOffset(0f);
+        xAxis.setXOffset(0f);
+
+
+        YAxis yAxis = mChart.getYAxis();
+        ///yAxis.setLabelCount(5, false);
+        yAxis.setTextSize(12f);
+        yAxis.setAxisMinimum(0f);
+        //yAxis.setAxisMaximum(80f);
+        yAxis.setDrawLabels(false);
+
+//        Legend l = mChart.getLegend();
+//        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+//        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+//        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+//        l.setDrawInside(false);
+//        l.setXEntrySpace(7f);
+//        l.setYEntrySpace(5f);
+//        l.setTextColor(Color.BLACK);
+
+    }
+
+    private void setRadarData(final Map<String, Double> predictions) {
+
+        ArrayList<RadarEntry> predictVals = new ArrayList<>();
+        for(final String label : predictions.keySet())
+        {
+            predictVals.add(new RadarEntry(predictions.get(label).floatValue(), label));
+        }
+
+        RadarDataSet set1 = new RadarDataSet(predictVals, mCurrLocation);
+        set1.setColor(Color.rgb(121, 162, 175));
+        set1.setFillColor(Color.rgb(121, 162, 175));//.setFillColor(Color.rgb(103, 110, 129));
+        set1.setDrawFilled(true);
+        set1.setFillAlpha(180);
+        set1.setLineWidth(2f);
+        set1.setDrawHighlightCircleEnabled(true);
+        set1.setDrawHighlightIndicators(false);
+
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+            private final String[] mActivities = predictions.keySet().toArray(new String[predictions.keySet().size()]);
+
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return mActivities[(int) value % mActivities.length];
+            }
+        });
+//        RadarDataSet set2 = new RadarDataSet(entries2, "This Week");
+//        set2.setColor(Color.rgb(121, 162, 175));
+//        set2.setFillColor(Color.rgb(121, 162, 175));
+//        set2.setDrawFilled(true);
+//        set2.setFillAlpha(180);
+//        set2.setLineWidth(2f);
+//        set2.setDrawHighlightCircleEnabled(true);
+//        set2.setDrawHighlightIndicators(false);
+
+        ArrayList<IRadarDataSet> sets = new ArrayList<IRadarDataSet>();
+        sets.add(set1);
+
+        RadarData data = new RadarData(sets);
+        data.setValueTextSize(16f);
+        data.setDrawValues(false);
+        data.setValueTextColor(Color.WHITE);
+
+        mChart.setData(data);
+        mChart.invalidate();
+    }
+
+
+    private void updateLabel(final String newLabel) {
+
+        final String currentLabel = predictLabelTextView.getText().toString();
+        if(!currentLabel.equals(newLabel))
+        {
+            predictLabelTextView.setText(newLabel);
+            Vibrator vibrateOnPredict = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrateOnPredict.vibrate(vibrationPattern, -1);
+        }
     }
 }

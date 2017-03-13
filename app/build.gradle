@@ -7,12 +7,14 @@ android {
         applicationId "blueguy.rf_localizer"
         minSdkVersion 24
         targetSdkVersion 25
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         jackOptions {
             enabled true
         }
+
     }
     buildTypes {
 
@@ -44,4 +46,6 @@ dependencies {
     compile 'com.android.support:support-v4:25.2.0'
     compile 'com.android.support:design:25.2.0'
     testCompile 'junit:junit:4.12'
+
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
 }

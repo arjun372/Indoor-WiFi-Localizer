@@ -5,12 +5,6 @@
     android:orientation="vertical"
     tools:context="blueguy.rf_localizer.Fragment_TrainingScreen">
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,11 +22,11 @@
         android:id="@+id/predicting_screen_location_text_view"
         />
 
-    <Space
+    <com.github.mikephil.charting.charts.RadarChart
+        android:id="@+id/chart1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        />
+        android:layout_weight="43.69" />
 
 
     <TextView
@@ -47,7 +41,7 @@
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="0.52"
         />
 
     <Button
@@ -57,14 +51,6 @@
         android:id="@+id/button_finish_predicting"
         android:background="@color/colorBlue"
         />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
-        />
-
-
 
 
 </LinearLayout>
