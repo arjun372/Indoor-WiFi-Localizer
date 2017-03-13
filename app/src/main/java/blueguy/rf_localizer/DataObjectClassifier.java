@@ -59,12 +59,16 @@ public class DataObjectClassifier implements Serializable{
     }
 
     public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, String locationName) {
+        this.mClassifierName = locationName.trim().replaceAll(" ", "");
+        retrainClassifier(dataWithLabels);
+    }
+
+    public void retrainClassifier(final List<DataPair<DataObject, String>> dataWithLabels) {
 
         /* save data for future use */
-        this.mClassifierName = locationName.trim().replaceAll(" ", "");
-        this.mLabeledRawData = dataWithLabels;
+        updateRawData(dataWithLabels);
 
-        final Instances dataInstances = convertDataObjectToInstances(dataWithLabels);
+        final Instances dataInstances = convertDataObjectToInstances(this.mLabeledRawData);
         this.mClassifier = buildClassifier(dataInstances);
 
         /* save instances to arff for inspection with weka GUI */
@@ -79,7 +83,10 @@ public class DataObjectClassifier implements Serializable{
     public Map<String, Double> classify(List<DataPair<DataObject, String>> data) {
 
         /** create a list of data with unknown labels **/
-        data.forEach(single -> single.second = ScanService.CLASS_UNKNOWN);
+        for(DataPair singleData : data)
+        {
+            singleData.second = ScanService.CLASS_UNKNOWN;
+        }
 
         // convert list of unlabeled data to instances
         final Instances toPredictOn = convertDataObjectToInstances(data);
@@ -89,7 +96,7 @@ public class DataObjectClassifier implements Serializable{
         ArrayList<Double> accumulatedDistributions = new ArrayList<>();
         mClassLabels.forEach(eachLabel -> accumulatedDistributions.add(0.0));
 
-        if(DEBUG) System.err.println(mClassifier.toString());
+        //if(DEBUG) System.err.println(mClassifier.toString());
 
         /** classify with current classifier **/
         for(final Instance singleInstance : toPredictOn)
@@ -188,28 +195,15 @@ public class DataObjectClassifier implements Serializable{
          * */
 
         /* Step 1 */
-//        for (final String uniqueFeatureID : featureColumnIndex.keySet())
-//        {
-//            final Attribute uniqueAttribute = new Attribute(uniqueFeatureID);
-//            featureAttrList.add(uniqueAttribute);
-//        }
-
-        /* Step 2 */
         final Attribute classAttribute = new Attribute(ATTRIBUTE_CLASS, new ArrayList<>(mClassLabels));
-        if (DEBUG) Log.e(TAG, mClassifierName + ":" + classAttribute.toString());
         mFeatureSet.put(ATTRIBUTE_CLASS, classAttribute);
 
-        /* Step 3 */
+        if (DEBUG) Log.e(TAG, "["+mClassifierName + "] Labels :: " + classAttribute.toString());
+
+        /* Step 2 */
         final ArrayList<Attribute> featureAttrList = new ArrayList<> (mFeatureSet.values());
         Instances dataInstances = new Instances(mClassifierName, featureAttrList, 0);
         dataInstances.setClass(classAttribute);
-
-        /* Step 4 */
-        //if(DEBUG) System.err.println(dataInstances.toSummaryString());
-
-
-        /** -------------------------------------------------------------------------------------**/
-
 
         /** Next, we will populate a row using data timestamp, @featureColumnIndex and @dataWithLabels
          * Step 5: Create a model empty instance (with all missing values) -> '?' and structure set to dataInstances
@@ -303,7 +297,7 @@ public class DataObjectClassifier implements Serializable{
 
     private static weka.classifiers.Classifier buildClassifier(Instances structure) {
 
-        if(DEBUG) Log.d(TAG, "Builiding classifier..");
+        Log.v(TAG, "Builiding classifier using "+structure.numInstances()+" instances...");
 
         /* Randomize data */
         Log.v(TAG, "Randomizing instances");
@@ -313,24 +307,28 @@ public class DataObjectClassifier implements Serializable{
         Log.v(TAG, "Balancing classes");
         structure = balanceClasses(structure);
 
-        NaiveBayes naiveBayes = new NaiveBayes();
+
+        NaiveBayes classifier = new NaiveBayes();
+
         try {
 
             /* set mClassifier properties */
-            naiveBayes.setUseSupervisedDiscretization(false);
-            naiveBayes.setDisplayModelInOldFormat(false);
-            naiveBayes.setUseKernelEstimator(true);
-            //naiveBayes.setNumTrees(10);
-            naiveBayes.setDebug(DEBUG);
+            classifier.setUseSupervisedDiscretization(false);
+            classifier.setDisplayModelInOldFormat(false);
+            classifier.setUseKernelEstimator(true);
+//            classifier.setNumTrees(10);
+            classifier.setDebug(DEBUG);
 
             /* build mClassifier with given instances */
-            naiveBayes.buildClassifier(structure);
-            if(DEBUG) Log.e(TAG, naiveBayes.toString());
+            classifier.buildClassifier(structure);
+
+            if(DEBUG) Log.e(TAG, classifier.toString());
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return naiveBayes;
+        return classifier;
     }
 
     private boolean InstancesToArff(final Instances dataSet) {
@@ -353,6 +351,7 @@ public class DataObjectClassifier implements Serializable{
         Instances balanced = unbalanced;
         ClassBalancer classBalancerFilter = new ClassBalancer();
         classBalancerFilter.setDebug(DEBUG);
+        if(DEBUG) Log.v(TAG, "Balancer: "+classBalancerFilter.toString());
         try {
             classBalancerFilter.setInputFormat(unbalanced);
             balanced = Filter.useFilter(unbalanced, classBalancerFilter);
@@ -362,5 +361,9 @@ public class DataObjectClassifier implements Serializable{
         return balanced;
     }
 
+    private void updateRawData(final List<DataPair<DataObject, String>> dataWithLabels) {
+        if(mLabeledRawData == null) mLabeledRawData = new ArrayList<>();
+        mLabeledRawData.addAll(new ArrayList<>(dataWithLabels));
+    }
 }
 

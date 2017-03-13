@@ -19,6 +19,7 @@ import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.RadarData;
@@ -29,7 +30,11 @@ import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import blueguy.rf_localizer.Scanners.DataObject;
+import blueguy.rf_localizer.utils.DataPair;
 
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
@@ -46,20 +51,23 @@ public class Fragment_PredictingScreen extends Fragment {
 
     private Handler mPredictionRequestHandler = new Handler();
 
-    private static final Long predictionTimeoutHistoryMs = 30000L;
+    private static final Long predictionTimeoutHistoryMs = 10000L;
 
-    private static final long[] vibrationPattern = new long[] {500L, 500L, 500L, 500L};
+    private static final long[] vibrationPattern = new long[] {0L, 500L, 0L};
 
+    private Button yesButton, noButton;
     private RadarChart mChart;
 
-    private static final String UNKNOWN = "Calculating..";
+    private int labelIdx = 0;
+    private static final String UNKNOWN = "Calculating...";
 
     private Runnable mPredictionRequest = new Runnable() {
         @Override
         public void run() {
             final Long now = System.currentTimeMillis();
             final Long past = now - predictionTimeoutHistoryMs;
-            final Map<String, Double> distributions = ((MainActivity)getActivity()).mScanService.predictOnData(false);
+            final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = ((MainActivity)getActivity()).mScanService.predictOnData(false);
+            final Map<String, Double> distributions = distributionsWithData.second;
 
             setRadarData(distributions);
 
@@ -73,6 +81,25 @@ public class Fragment_PredictingScreen extends Fragment {
 
             final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
             updateLabel(predictedLabel);
+
+            yesButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    final String currentLabel = predictLabelTextView.getText().toString();
+                    List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
+                    for(DataPair singleData : unLabeledData) singleData.second = currentLabel;
+                    ((MainActivity)getActivity()).mScanService.updateClassifierData(unLabeledData);
+                }
+            });
+
+            noButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    final List<String> labels = new ArrayList<>(distributions.keySet());
+                    labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx+1;
+
+                    if(labelIdx < labels.size())
+                        updateLabel(labels.get(labelIdx));
+                }
+            });
 
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
         }
@@ -121,7 +148,10 @@ public class Fragment_PredictingScreen extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_predicting_screen, container, false);
+
         mChart = (RadarChart) rootView.findViewById(R.id.chart1);
+        yesButton = (Button) rootView.findViewById(R.id.button_yes);
+        noButton = (Button) rootView.findViewById(R.id.button_no);
 
         initRadarChart();
 
@@ -169,30 +199,16 @@ public class Fragment_PredictingScreen extends Fragment {
         mChart.setWebColorInner(Color.DKGRAY);
         mChart.setWebAlpha(100);
 
-        mChart.animateXY(1400, 1400, Easing.EasingOption.EaseInOutQuad, Easing.EasingOption.EaseInOutQuad);
-
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextColor(Color.BLACK);
-        xAxis.setTextSize(9f);
+        xAxis.setTextSize(8f);
         xAxis.setYOffset(0f);
         xAxis.setXOffset(0f);
 
-
         YAxis yAxis = mChart.getYAxis();
-        ///yAxis.setLabelCount(5, false);
-        yAxis.setTextSize(12f);
+        yAxis.setTextSize(8f);
         yAxis.setAxisMinimum(0f);
-        //yAxis.setAxisMaximum(80f);
         yAxis.setDrawLabels(false);
-
-//        Legend l = mChart.getLegend();
-//        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-//        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-//        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-//        l.setDrawInside(false);
-//        l.setXEntrySpace(7f);
-//        l.setYEntrySpace(5f);
-//        l.setTextColor(Color.BLACK);
 
     }
 
@@ -205,11 +221,11 @@ public class Fragment_PredictingScreen extends Fragment {
         }
 
         RadarDataSet set1 = new RadarDataSet(predictVals, mCurrLocation);
-        set1.setColor(Color.rgb(121, 162, 175));
-        set1.setFillColor(Color.rgb(121, 162, 175));//.setFillColor(Color.rgb(103, 110, 129));
+        set1.setColor(Color.RED);//.rgb(121, 162, 175));
+        set1.setFillColor(Color.RED);//.setFillColor(Color.rgb(103, 110, 129));
         set1.setDrawFilled(true);
         set1.setFillAlpha(180);
-        set1.setLineWidth(2f);
+        set1.setLineWidth(4f);
         set1.setDrawHighlightCircleEnabled(true);
         set1.setDrawHighlightIndicators(false);
 
@@ -223,6 +239,7 @@ public class Fragment_PredictingScreen extends Fragment {
                 return mActivities[(int) value % mActivities.length];
             }
         });
+
 //        RadarDataSet set2 = new RadarDataSet(entries2, "This Week");
 //        set2.setColor(Color.rgb(121, 162, 175));
 //        set2.setFillColor(Color.rgb(121, 162, 175));
@@ -241,7 +258,7 @@ public class Fragment_PredictingScreen extends Fragment {
         data.setValueTextColor(Color.WHITE);
 
         mChart.setData(data);
-        mChart.invalidate();
+        mChart.animateXY(500, 500, Easing.EasingOption.EaseInOutCirc, Easing.EasingOption.EaseInOutCirc);
     }
 
 

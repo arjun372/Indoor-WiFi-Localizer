@@ -222,14 +222,24 @@ public class ScanService extends Service {
         return START_NOT_STICKY;
     }
 
-    public Map<String, Double> predictOnData(final boolean accumulate) {
-        final Map<String, Double> predictions = predict();
+    public DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictOnData(final boolean accumulate) {
+        final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictions = predict();
         if(!accumulate) mAccumulatedDataAndLabels = new ArrayList<>();
         return predictions;
     }
 
-    private Map<String, Double> predict() {
+    private DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predict() {
         if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
-        return mCurrDataObjectClassifier.classify(mAccumulatedDataAndLabels);
+        final Map<String, Double> predictions = mCurrDataObjectClassifier.classify(mAccumulatedDataAndLabels);
+        return new DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> (mAccumulatedDataAndLabels, predictions);
+    }
+
+    public void updateClassifierData(final List<DataPair<DataObject, String>> labeledData) {
+        if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
+        mCurrDataObjectClassifier.retrainClassifier(labeledData);
+        try{
+            PersistentMemoryManager.saveObjectFile(this, mLocation, mCurrDataObjectClassifier);
+            Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mCurrDataObjectClassifier.getRawData().size());
+        } catch (Exception e) {e.printStackTrace();}
     }
 }
