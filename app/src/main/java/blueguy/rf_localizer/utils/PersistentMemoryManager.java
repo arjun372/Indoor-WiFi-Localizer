@@ -2,9 +2,11 @@ package blueguy.rf_localizer.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,20 +52,18 @@ public class PersistentMemoryManager {
         putStringCollection(context, KEY_LOCATIONS_LIST, prevSet);
     }
 
-    public static final Object loadObjectFile(Context context, String classifierName) throws IOException, ClassNotFoundException {
-        FileInputStream fileInputStream = context.openFileInput(classifierName+".gz");
-        ObjectInputStream objectInputStream = new ObjectInputStream(new GZIPInputStream(fileInputStream));
+    public static final Object loadObjectFile(final String classifierName) throws IOException, ClassNotFoundException {
+        final File inputFile = new File(Environment.getExternalStorageDirectory(), classifierName+".dat");
+        ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(inputFile));
         Object object = objectInputStream.readObject();
         objectInputStream.close();
-        fileInputStream.close();
         return object;
     }
 
-    public static final void saveObjectFile(Context context, String classifierName, Object object) throws IOException {
-        FileOutputStream fileOutputStream = context.openFileOutput(classifierName+".gz", Context.MODE_PRIVATE);
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(fileOutputStream)));
+    public static final void saveObjectFile(final String classifierName, Object object) throws IOException {
+        final File outputFile = new File(Environment.getExternalStorageDirectory(), classifierName+".dat");
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
         objectOutputStream.writeObject(object);
         objectOutputStream.close();
-        fileOutputStream.close();
     }
 }

@@ -43,6 +43,7 @@ public class DataObjectClassifier implements Serializable{
 
     private static final long serialVersionUID = 3L;
 
+    //private
     private HashMap<String, Attribute> mFeatureSet = new HashMap<>();
 
     private List<DataPair<DataObject, String>> mLabeledRawData;
@@ -125,7 +126,10 @@ public class DataObjectClassifier implements Serializable{
     public List<DataPair<String, Double>> evaluate(final List<DataPair<DataObject, String>> labeledData) {
         return new ArrayList<>();
     }
-
+//
+//    private static <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
+//
+//    }
     private static <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
         return IntStream.range(0, keys.size()).boxed().collect(Collectors.toMap(keys::get, values::get));
     }

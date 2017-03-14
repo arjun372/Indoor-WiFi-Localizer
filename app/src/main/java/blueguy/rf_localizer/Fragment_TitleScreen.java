@@ -36,6 +36,7 @@ public class Fragment_TitleScreen extends Fragment{
         // Set up buttons
         Button trainButton = (Button) rootView.findViewById(R.id.main_button_train);
         Button predictButton = (Button) rootView.findViewById(R.id.main_button_predict);
+        Button navigateButton = (Button) rootView.findViewById(R.id.main_button_navigate);
 
         trainButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +51,14 @@ public class Fragment_TitleScreen extends Fragment{
             public void onClick(View v) {
 //                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
                 mShowPredictingPicker();
+            }
+        });
+
+        navigateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
+                mShowNavigationPicker();
             }
         });
 
@@ -105,6 +114,25 @@ public class Fragment_TitleScreen extends Fragment{
                     }
                 })
 
+                .show();
+    }
+
+    private void mShowNavigationPicker() {
+        final ArrayList<String> listItems = new ArrayList<>(PersistentMemoryManager.getLocationsList(getActivity()));
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.main_location_prompt)
+                .setSingleChoiceItems(listItems.toArray(new CharSequence[listItems.size()]), 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {}
+                })
+                .setPositiveButton(R.string.start_predicting, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ListView listView = ((AlertDialog)dialog).getListView();
+                        Object checkedItem = listView.getAdapter().getItem(listView.getCheckedItemPosition());
+                        mChangeFragment(IndoorMap.newInstance((String)checkedItem));
+                    }
+                })
                 .show();
     }
 }

@@ -79,7 +79,12 @@ public class Fragment_PredictingScreen extends Fragment {
                 }
             }
 
-            final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
+            String predictedLabel = "error";
+            final Double maxValue = Collections.max(distributions.values());
+            for(final String label : distributions.keySet()) if(maxValue.equals(distributions.get(label))) predictedLabel = label;
+
+           // final String predictedLabel = distributions.keySet().forEach(key->distributions.get(key));
+            // final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
             updateLabel(predictedLabel);
 
             yesButton.setOnClickListener(new View.OnClickListener() {

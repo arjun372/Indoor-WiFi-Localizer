@@ -41,6 +41,17 @@
     <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0.5" />
+
+    <Button
+        android:text="Navigate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/main_button_navigate" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1" />
 
 

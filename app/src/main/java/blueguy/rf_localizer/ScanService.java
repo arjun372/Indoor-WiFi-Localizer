@@ -72,7 +72,7 @@ public class ScanService extends Service {
     private void loadClassifier(final String location, final boolean train) {
         mLocation = location;
         try {
-            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(this, location);
+            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(location);
             mAccumulatedDataAndLabels = train ? mCurrDataObjectClassifier.getRawData() : new ArrayList<>();
             Log.e(TAG, "successfully loaded mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
         } catch (IOException | ClassNotFoundException e) {
@@ -86,7 +86,7 @@ public class ScanService extends Service {
     public void trainClassifier() {
         try {
             mCurrDataObjectClassifier = new DataObjectClassifier(mAccumulatedDataAndLabels, mLocation);
-            PersistentMemoryManager.saveObjectFile(this, mLocation, mCurrDataObjectClassifier);
+            PersistentMemoryManager.saveObjectFile(mLocation, mCurrDataObjectClassifier);
             Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,7 +238,7 @@ public class ScanService extends Service {
         if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
         mCurrDataObjectClassifier.retrainClassifier(labeledData);
         try{
-            PersistentMemoryManager.saveObjectFile(this, mLocation, mCurrDataObjectClassifier);
+            PersistentMemoryManager.saveObjectFile(mLocation, mCurrDataObjectClassifier);
             Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mCurrDataObjectClassifier.getRawData().size());
         } catch (Exception e) {e.printStackTrace();}
     }
