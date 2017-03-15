@@ -2,11 +2,6 @@ package blueguy.rf_localizer;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.hardware.GeomagneticField;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -22,20 +17,21 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
-
 import com.github.mikephil.charting.interfaces.datasets.IScatterDataSet;
 
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
 import blueguy.rf_localizer.Scanners.WifiScanner;
+import blueguy.rf_localizer.graphs.CoordinateEdge;
+import blueguy.rf_localizer.graphs.CoordinateNode;
 import blueguy.rf_localizer.utils.DataPair;
 
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
@@ -194,21 +190,53 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.setBackgroundResource(R.drawable.floor_plan_boelter_3rd_floor);
         mChart.setDrawGridBackground(false);
 
+        mChart.setPinchZoom(false);
+
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextColor(Color.BLACK);
         xAxis.setTextSize(0f);
         xAxis.setYOffset(0f);
         xAxis.setXOffset(0f);
 
+        UndirectedGraph<CoordinateNode, CoordinateEdge> graph = new SimpleGraph<>(CoordinateEdge.class);
+        List<CoordinateNode> nodes = new ArrayList<>();
+        float totalX = 620;
+        float totalY = 705;
+
+        nodes.add(new CoordinateNode("3704", 470/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3714", 420/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3732D", 394/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3760", 75/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3770", 12/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3440", 513/totalX, 88/totalY));
+        nodes.add(new CoordinateNode("3436", 511/totalX, 121/totalY));
+        nodes.add(new CoordinateNode("3428", 511/totalX, 183/totalY));
+        nodes.add(new CoordinateNode("3420", 511/totalX, 300/totalY));
+        nodes.add(new CoordinateNode("3400", 511/totalX, 357/totalY));
+
+        for (CoordinateNode node : nodes) {
+            graph.addVertex(node);
+        }
+
+
+
+//        mChart.setPinchZoom(false);
+
         ArrayList<Entry> locations = new ArrayList<>();
-        locations.add(new Entry(0.15F, 0.15F, "3074"));
-        locations.add(new Entry(0.25F, 0.15F));
-        locations.add(new Entry(0.45F, 0.95F));
-        locations.add(new Entry(0.55F, 0.95F));
-        locations.add(new Entry(0.35F, 0.95F));
-        locations.add(new Entry(0.0F, 0.95F));
+//        locations.add(new Entry(0.15F, 0.15F, "3074"));
+//        locations.add(new Entry(0.25F, 0.15F));
+//        locations.add(new Entry(0.45F, 0.95F));
+//        locations.add(new Entry(0.55F, 0.95F));
+//        locations.add(new Entry(0.35F, 0.95F));
 //        locations.add(new Entry(0.0F, 0.95F));
 //        locations.add(new Entry(0.0F, 0.95F));
+//        locations.add(new Entry(0.0F, 0.95F));
+
+        for (CoordinateNode node : graph.vertexSet()) {
+            locations.add(new Entry(node.getXCoord(), node.getYCoord(), node.getLabel()));
+        }
+
+
 
         ScatterDataSet set1 = new ScatterDataSet(locations, "");
         set1.setColor(Color.RED, 180);
