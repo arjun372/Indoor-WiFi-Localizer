@@ -192,6 +192,12 @@ public class Fragment_IndoorMap extends Fragment {
 
         mChart.setPinchZoom(false);
 
+        mChart.getXAxis().setAxisMinimum(0F);
+        mChart.getXAxis().setAxisMaximum(1F);
+
+        mChart.getAxisLeft().setAxisMinimum(0F);
+        mChart.getAxisLeft().setAxisMaximum(1F);
+
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextColor(Color.BLACK);
         xAxis.setTextSize(0f);
