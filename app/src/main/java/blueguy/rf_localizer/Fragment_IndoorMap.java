@@ -312,8 +312,9 @@ public class Fragment_IndoorMap extends Fragment {
         Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
 
         ScatterData scatterData = mChart.getScatterData();
-        scatterData.getDataSetByLabel("boelter 3rd floor", true);
-        System.err.println("scatter data: " + scatterData.toString());
+        scatterData.getDataSetByLabel("3704", true).setValueTextColor(Color.GREEN);
+        mChart.setData(scatterData);
+
 //        mChart.getScatterData();
     }
 
