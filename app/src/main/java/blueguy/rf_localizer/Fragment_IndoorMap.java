@@ -313,7 +313,7 @@ public class Fragment_IndoorMap extends Fragment {
 
         ScatterData scatterData = mChart.getScatterData();
         scatterData.getDataSetByLabel("boelter 3rd floor", true);
-        System.err.println(scatterData.toString());
+        System.err.println("scatter data: " + scatterData.toString());
 //        mChart.getScatterData();
     }
 
