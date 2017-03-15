@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.mikephil.charting.charts.ScatterChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
@@ -277,7 +276,6 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.getAxisRight().setAxisMinimum(0F);
         mChart.getAxisRight().setAxisMaximum(1F);
 
-        mChart.setDescription(new Description());
         mChart.getLegend().setEnabled(false);
         mChart.getAxisLeft().setDrawLabels(false);
         mChart.getAxisRight().setDrawLabels(false);
@@ -287,7 +285,7 @@ public class Fragment_IndoorMap extends Fragment {
 
         mChart.setScaleEnabled(false);
 
-        mChart.setExtraOffsets(0f, 0f, 0f, 0f);
+//        mChart.setExtraOffsets(0f, 0f, 0f, 0f);
 
 //        mChart.setPadding(0, 0, 0, 0);
 
