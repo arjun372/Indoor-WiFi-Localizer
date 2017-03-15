@@ -249,8 +249,21 @@ public class Fragment_IndoorMap extends Fragment {
         //.setFillColor(Color.rgb(103, 110, 129));)
         set1.setDrawHighlightIndicators(false);
 
+
+        ArrayList<Entry> calibEntries = new ArrayList<>();
+        calibEntries.add(new Entry(0F, 0F));
+
+        ScatterDataSet calSet = new ScatterDataSet(calibEntries, "calib");
+        calSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
+        calSet.setColor(Color.BLUE, 180);
+        calSet.setScatterShapeSize(64f);
+        calSet.setScatterShapeHoleColor(Color.BLUE);
+        calSet.setScatterShapeHoleRadius(1f);
+        calSet.setHighlightEnabled(true);
+
         ArrayList<IScatterDataSet> sets = new ArrayList<>();
         sets.add(set1);
+        sets.add(calSet);
 
         ScatterData data = new ScatterData(sets);
         data.setValueTextSize(16f);
