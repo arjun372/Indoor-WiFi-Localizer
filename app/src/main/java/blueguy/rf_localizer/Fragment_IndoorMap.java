@@ -312,24 +312,34 @@ public class Fragment_IndoorMap extends Fragment {
         Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
         ScatterData scatterData = mChart.getScatterData();
 
-        System.err.println("Colors: OLD:  " + scatterData.getColors().toString());
-        System.err.println("Colors: OLD: length:  " + scatterData.getColors().length);
-        for (int i : scatterData.getColors()) {
-            System.err.println("color: " + i);
-        }
-        List<Integer> colors = new ArrayList<>();
-        for (int col : scatterData.getColors()) {
-            colors.add(col);
+        ScatterDataSet scatterDataSet = (ScatterDataSet) scatterData.getDataSetByLabel("boelter 3rd floor", true);
+        List<Integer> oldColors = scatterDataSet.getColors();
+        for (int c : oldColors) {
+            System.err.println("old color: " + c);
         }
 
+        oldColors.set(0, Color.BLUE);
+        scatterDataSet.setColors(oldColors);
 
-        colors.set(0, Color.BLUE);
-        System.err.println("Colors: NEW:  " + colors.toString());
-        for (int i : colors) {
-            System.err.println("color: " + i);
-        }
 
-        scatterData.setValueTextColors(colors);
+//        System.err.println("Colors: OLD:  " + scatterData.getColors().toString());
+//        System.err.println("Colors: OLD: length:  " + scatterData.getColors().length);
+//        for (int i : scatterData.getColors()) {
+//            System.err.println("color: " + i);
+//        }
+//        List<Integer> colors = new ArrayList<>();
+//        for (int col : scatterData.getColors()) {
+//            colors.add(col);
+//        }
+//
+////        colors.set(0, Color.BLUE);
+//        colors.set(0, getResources().getColor(R.color.colorBlue, null));
+//        System.err.println("Colors: NEW:  " + colors.toString());
+//        for (int i : colors) {
+//            System.err.println("color: " + i);
+//        }
+
+//        scatterData.setValueTextColors(colors);
 //        scatterData.getDataSetByLabel("3704", true).setValueTextColor(Color.GREEN);
 //        mChart.setData(scatterData);
 
