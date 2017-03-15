@@ -283,7 +283,7 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.getAxisRight().setDrawLabels(false);
         mChart.getXAxis().setDrawLabels(false);
 
-        mChart.fitScreen();
+//        mChart.fitScreen();
 
         mChart.setScaleEnabled(false);
 
