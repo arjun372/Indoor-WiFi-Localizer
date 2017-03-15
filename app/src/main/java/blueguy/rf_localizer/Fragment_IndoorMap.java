@@ -223,11 +223,11 @@ public class Fragment_IndoorMap extends Fragment {
 
 
 
-        ScatterDataSet set1 = new ScatterDataSet(locations, "");
+        ScatterDataSet set1 = new ScatterDataSet(locations, "boelter 3rd floor");
         set1.setColor(Color.RED, 180);
         set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        set1.setScatterShapeSize(64f);
-        set1.setScatterShapeHoleColor(Color.BLUE);
+        set1.setScatterShapeSize(16f);
+        set1.setScatterShapeHoleColor(Color.RED);
         set1.setScatterShapeHoleRadius(1f);
         set1.setHighlightEnabled(true);
 
@@ -238,18 +238,18 @@ public class Fragment_IndoorMap extends Fragment {
         ArrayList<Entry> calibEntries = new ArrayList<>();
         calibEntries.add(new Entry(0F, 0F));
 
-        ScatterDataSet calSet = new ScatterDataSet(calibEntries, "calib");
-        calSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        calSet.setColor(Color.BLUE, 180);
-        calSet.setScatterShapeSize(16f);
-//        calSet.setScatterShapeSize(64f);
-        calSet.setScatterShapeHoleColor(Color.BLUE);
-        calSet.setScatterShapeHoleRadius(1f);
-        calSet.setHighlightEnabled(true);
+//        ScatterDataSet calSet = new ScatterDataSet(calibEntries, "calib");
+//        calSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
+//        calSet.setColor(Color.BLUE, 180);
+//        calSet.setScatterShapeSize(16f);
+////        calSet.setScatterShapeSize(64f);
+//        calSet.setScatterShapeHoleColor(Color.BLUE);
+//        calSet.setScatterShapeHoleRadius(1f);
+//        calSet.setHighlightEnabled(true);
 
         ArrayList<IScatterDataSet> sets = new ArrayList<>();
         sets.add(set1);
-        sets.add(calSet);
+//        sets.add(calSet);
 
         ScatterData data = new ScatterData(sets);
         data.setValueTextSize(16f);
@@ -311,8 +311,9 @@ public class Fragment_IndoorMap extends Fragment {
     private void updateLocation(final List<Double> predictions) {
         Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
 
-
-
+        ScatterData scatterData = mChart.getScatterData();
+        scatterData.getDataSetByLabel("boelter 3rd floor", true);
+        System.err.println(scatterData.toString());
 //        mChart.getScatterData();
     }
 

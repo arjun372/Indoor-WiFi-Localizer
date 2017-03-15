@@ -10,6 +10,7 @@
         android:layout_height="match_parent"
         android:src="@drawable/floor_plan_boelter_3rd_floor"
         android:scaleType="fitXY"
+        android:id="@+id/indoor_map_floor_plan"
         />
 
     <com.github.mikephil.charting.charts.ScatterChart
