@@ -49,31 +49,40 @@ public class Fragment_PredictingScreen extends Fragment {
 
     private static final String TAG = "Predicting_Fragment";
 
-    private static final long[] newLocationVibration = new long[] {500L, 0L, 500L};
+    private static final long[] newLocationVibration = new long[]{500L, 0L, 500L};
 
     private static final Long updatePredictionVibration = 200L;
 
-    /** prediction related */
+    /**
+     * prediction related
+     */
     private static final Long predictionTimeoutHistoryMs = 10000L;
     private Handler mPredictionRequestHandler = new Handler();
     private static final boolean ACCUMULATE = false;
 
-    /** GUI related **/
+    /**
+     * GUI related
+     **/
     private TextView predictLabelTextView;
     private Button yesButton, noButton;
     private RadarChart mChart;
 
-    /** indoor-map related **/
+    /**
+     * indoor-map related
+     **/
     private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
     private IndoorMap mIndoorMap;
 
-    /** scanner related **/
+    /**
+     * scanner related
+     **/
     private List<Scanner> mScannerList;
     private ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(final List<DataObject> dataList) {
             if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
-            for(DataObject dataObject : dataList) mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN));
+            for (DataObject dataObject : dataList)
+                mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN));
             //mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
         }
     };
@@ -86,39 +95,44 @@ public class Fragment_PredictingScreen extends Fragment {
             final Long now = System.currentTimeMillis();
             final Long past = now - predictionTimeoutHistoryMs;
             final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = mIndoorMap.predictOnData(mAccumulatedDataAndLabels);
-            if(!ACCUMULATE) mAccumulatedDataAndLabels.clear();
+            if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
 
             final Map<String, Double> distributions = distributionsWithData.second;
 
             setRadarData(distributions);
 
-            if(DEBUG)
-            {
-                for(final String location : distributions.keySet())
-                {
+            if (DEBUG) {
+                for (final String location : distributions.keySet()) {
                     Log.d("PREDICTIONS", location + " : " + distributions.get(location));
                 }
             }
 
             String predictedLabel = "error";
             final Double maxValue = Collections.max(distributions.values());
-            for(final String label : distributions.keySet()) if(maxValue.equals(distributions.get(label))) predictedLabel = label;
+            for (final String label : distributions.keySet())
+                if (maxValue.equals(distributions.get(label))) predictedLabel = label;
 
-           // final String predictedLabel = distributions.keySet().forEach(key->distributions.get(key));
+            // final String predictedLabel = distributions.keySet().forEach(key->distributions.get(key));
             // final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
             updatePredictedLabel(predictedLabel);
 
-            yesButton.setOnClickListener(v -> {
-                final String currentLabel = predictLabelTextView.getText().toString();
-                List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
-                for(DataPair singleData : unLabeledData) singleData.second = currentLabel;
-                mIndoorMap.retrainWithData(unLabeledData);
+            yesButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String currentLabel = predictLabelTextView.getText().toString();
+                    List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
+                    for (DataPair singleData : unLabeledData) singleData.second = currentLabel;
+                    mIndoorMap.retrainWithData(unLabeledData);
+                }
             });
 
-            noButton.setOnClickListener(v -> {
-                final List<String> labels = new ArrayList<>(distributions.keySet());
-                labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx + 1;
-                if(labelIdx < labels.size()) updatePredictedLabelSilent(labels.get(labelIdx));
+            noButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final List<String> labels = new ArrayList<>(distributions.keySet());
+                    labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx + 1;
+                    if (labelIdx < labels.size()) updatePredictedLabelSilent(labels.get(labelIdx));
+                }
             });
 
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
@@ -218,8 +232,7 @@ public class Fragment_PredictingScreen extends Fragment {
     private void setRadarData(final Map<String, Double> predictions) {
 
         ArrayList<RadarEntry> predictVals = new ArrayList<>();
-        for(final String label : predictions.keySet())
-        {
+        for (final String label : predictions.keySet()) {
             predictVals.add(new RadarEntry(predictions.get(label).floatValue(), label));
         }
 
@@ -255,17 +268,20 @@ public class Fragment_PredictingScreen extends Fragment {
         mChart.animateXY(500, 500, Easing.EasingOption.EaseInOutCirc, Easing.EasingOption.EaseInOutCirc);
     }
 
-    private void resetPredictedLabel() {updatePredictedLabelSilent(DataObjectClassifier.CLASS_UNKNOWN);}
+    private void resetPredictedLabel() {
+        updatePredictedLabelSilent(DataObjectClassifier.CLASS_UNKNOWN);
+    }
+
     private void updatePredictedLabel(final String newLabel) {
-        if(updatePredictedLabelSilent(newLabel)) {
+        if (updatePredictedLabelSilent(newLabel)) {
             Vibrator vibrateOnPredict = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
             vibrateOnPredict.vibrate(newLocationVibration, -1);
         }
     }
+
     private boolean updatePredictedLabelSilent(final String newLabel) {
         final String currentLabel = predictLabelTextView.getText().toString();
-        if(!currentLabel.equals(newLabel))
-        {
+        if (!currentLabel.equals(newLabel)) {
             predictLabelTextView.setText(newLabel);
             return true;
         }
@@ -273,7 +289,7 @@ public class Fragment_PredictingScreen extends Fragment {
     }
 
     private void initScanners() {
-        if(DEBUG) Log.d(TAG, "initScanners");
+        if (DEBUG) Log.d(TAG, "initScanners");
         this.mScannerList = new ArrayList<>();
         this.mScannerList.add(new WifiScanner(mScannerCallback));
         //curScanners.add(new CellScanner(mScannerCallback));
@@ -282,19 +298,19 @@ public class Fragment_PredictingScreen extends Fragment {
         //curScanners.add(new RotationScanner(mScannerCallback));
         //curScanners.add(new MagneticFieldScanner(mScannerCallback));
         //curScanners.add(new PressureScanner(mScannerCallback));
-        for(Scanner x : this.mScannerList)
-        {
+        for (Scanner x : this.mScannerList) {
             x.startScan();
         }
     }
+
     private void removeScanners() {
-        if(DEBUG) Log.d(TAG, "removeScanners");
-        for(Scanner x : this.mScannerList)
-        {
+        if (DEBUG) Log.d(TAG, "removeScanners");
+        for (Scanner x : this.mScannerList) {
             x.stopScan();
         }
         this.mScannerList.clear();
     }
+
     private void initIndoorMap() {
         final String indoorMapName = getArguments().getString(IndoorMap.TAG_LOCATION);
         this.mIndoorMap = new IndoorMap(indoorMapName);

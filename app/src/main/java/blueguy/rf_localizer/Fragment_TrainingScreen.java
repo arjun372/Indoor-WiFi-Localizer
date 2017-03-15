@@ -1,7 +1,6 @@
 package blueguy.rf_localizer;
 
 import android.os.Bundle;
-
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,21 +30,30 @@ public class Fragment_TrainingScreen extends Fragment {
 
     private static final String TAG = "Training_Activity";
 
-    /** indoor-map related **/
+    /**
+     * indoor-map related
+     **/
     private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
     private String mGroundTruthLabel;
     private IndoorMap mIndoorMap;
 
-    /** scanner related **/
+    /**
+     * scanner related
+     **/
     private List<Scanner> mScannerList;
 
-    /** GUI related **/
+    /**
+     * GUI related
+     **/
 
     private ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
         public void onScanResult(final List<DataObject> dataList) {
             if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
-            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, mGroundTruthLabel)).collect(Collectors.toList()));
+            for (DataObject dataObject : dataList) {
+                mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, mGroundTruthLabel));
+            }
+//            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, mGroundTruthLabel)).collect(Collectors.toList()));
         }
     };
 
@@ -76,26 +84,35 @@ public class Fragment_TrainingScreen extends Fragment {
         EditText labelText = (EditText) rootView.findViewById(R.id.training_label_text);
 
         Button updateLabelButton = (Button) rootView.findViewById(R.id.button_update_label);
-        updateLabelButton.setOnClickListener(v -> {
-            String label = labelText.getText().toString();
-            if (label.equals("?") || label.equals(DataObjectClassifier.CLASS_UNKNOWN)) {
-                Toast.makeText(getActivity(), label + " is not a valid label", Toast.LENGTH_SHORT).show();
-            } else if (!label.isEmpty()) {
-                setGroundTruthLabel(label);
-                labelText.getText().clear();
+        updateLabelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String label = labelText.getText().toString();
+                if (label.equals("?") || label.equals(DataObjectClassifier.CLASS_UNKNOWN)) {
+                    Toast.makeText(getActivity(), label + " is not a valid label", Toast.LENGTH_SHORT).show();
+                } else if (!label.isEmpty()) {
+                    setGroundTruthLabel(label);
+                    labelText.getText().clear();
+                }
             }
         });
 
         Button clearLabelButton = (Button) rootView.findViewById(R.id.button_clear_label);
-        clearLabelButton.setOnClickListener(v -> {
-            resetGroundTruthLabel();
-            labelText.getText().clear();
+        clearLabelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetGroundTruthLabel();
+                labelText.getText().clear();
+            }
         });
 
         Button finishTrainingButton = (Button) rootView.findViewById(R.id.button_finish_training);
-        finishTrainingButton.setOnClickListener(v -> {
-            labelText.getText().clear();
-            getActivity().onBackPressed();
+        finishTrainingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                labelText.getText().clear();
+                getActivity().onBackPressed();
+            }
         });
 
         return rootView;
@@ -119,13 +136,17 @@ public class Fragment_TrainingScreen extends Fragment {
         initScanners();
     }
 
-    private void resetGroundTruthLabel() {setGroundTruthLabel(DataObjectClassifier.CLASS_UNKNOWN);}
+    private void resetGroundTruthLabel() {
+        setGroundTruthLabel(DataObjectClassifier.CLASS_UNKNOWN);
+    }
+
     private void setGroundTruthLabel(final String newLabel) {
         mGroundTruthLabel = newLabel;
         Toast.makeText(getActivity(), "new label: " + mGroundTruthLabel, Toast.LENGTH_SHORT).show();
     }
+
     private void initScanners() {
-        if(DEBUG) Log.d(TAG, "initScanners");
+        if (DEBUG) Log.d(TAG, "initScanners");
         this.mScannerList = new ArrayList<>();
         this.mScannerList.add(new WifiScanner(mScannerCallback));
         //curScanners.add(new CellScanner(mScannerCallback));
@@ -134,19 +155,19 @@ public class Fragment_TrainingScreen extends Fragment {
         //curScanners.add(new RotationScanner(mScannerCallback));
         //curScanners.add(new MagneticFieldScanner(mScannerCallback));
         //curScanners.add(new PressureScanner(mScannerCallback));
-        for(Scanner x : this.mScannerList)
-        {
+        for (Scanner x : this.mScannerList) {
             x.startScan();
         }
     }
+
     private void removeScanners() {
-        if(DEBUG) Log.d(TAG, "removeScanners");
-        for(Scanner x : this.mScannerList)
-        {
+        if (DEBUG) Log.d(TAG, "removeScanners");
+        for (Scanner x : this.mScannerList) {
             x.stopScan();
         }
         this.mScannerList.clear();
     }
+
     private void initIndoorMap() {
         final String indoorMapName = getArguments().getString(IndoorMap.TAG_LOCATION);
         this.mIndoorMap = new IndoorMap(indoorMapName);

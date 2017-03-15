@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "blueguy.rf_localizer"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 25
         multiDexEnabled true
         versionCode 1

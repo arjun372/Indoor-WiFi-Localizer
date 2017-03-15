@@ -80,7 +80,10 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         @Override
         public void onScanResult(final List<DataObject> dataList) {
             if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
-            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
+            for (DataObject dataObject : dataList) {
+                mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN));
+            }
+//            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
         }
     };
 
