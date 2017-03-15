@@ -107,20 +107,20 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 //            final Double maxValue = Collections.max(distributions.values());
 //            for(final String label : distributions.keySet()) if(maxValue.equals(distributions.get(label))) predictedLabel = label;
 
-            int index = 0;
-            Double max = 0.0;
+//            int index = 0;
+//            Double max = 0.0;
+//
 
+//
+//            for(int i = 0; i < values.length; i++)
+//            {
+//               if(values[i] > max)
+//               {
+//                   index = i;
+//               }
+//            }
             final Double[] values = (Double[]) distributions.values().toArray();
-
-            for(int i = 0; i < values.length; i++)
-            {
-               if(values[i] > max)
-               {
-                   index = i;
-               }
-            }
-
-            updateLocation(index);
+            updateLocation(values);
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
         }
     };
@@ -179,17 +179,13 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
     }
 
+    //TODO :: MpAndroidChart Libray : set image as background
     private void initRadarChart() {
 
         mChart.getDescription().setEnabled(false);
         mChart.setBackgroundColor(Color.TRANSPARENT); //set whatever color you prefer
+        mChart.setBackgroundResource(R.drawable.ic_arrow);
         mChart.setDrawGridBackground(false);
-
-//        mChart.setWebLineWidth(2f);
-//        mChart.setWebColor(Color.DKGRAY);
-//        mChart.setWebLineWidthInner(1.5f);
-//        mChart.setWebColorInner(Color.DKGRAY);
-//        mChart.setWebAlpha(100);
 
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextColor(Color.BLACK);
@@ -197,13 +193,8 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         xAxis.setYOffset(0f);
         xAxis.setXOffset(0f);
 
-//        YAxis yAxis = mChart.getYAxis();
-//        yAxis.setTextSize(8f);
-//        yAxis.setAxisMinimum(0f);
-//        yAxis.setDrawLabels(false);
-
         ArrayList<Entry> locations = new ArrayList<>();
-        locations.add(new Entry(0.15F, 0.15F));
+        locations.add(new Entry(0.15F, 0.15F, "3074"));
         locations.add(new Entry(0.25F, 0.15F));
         locations.add(new Entry(0.45F, 0.95F));
         locations.add(new Entry(0.55F, 0.95F));
@@ -213,7 +204,7 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 //        locations.add(new Entry(0.0F, 0.95F));
 
         ScatterDataSet set1 = new ScatterDataSet(locations, "");
-        set1.setColor(Color.RED, 180);//.rgb(121, 162, 175));
+        set1.setColor(Color.RED, 180);
         set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
         set1.setScatterShapeSize(64f);
         set1.setScatterShapeHoleColor(Color.BLUE);
@@ -236,8 +227,10 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 
     }
 
-    private void updateLocation(final int index) {
-        Log.e("onLocation", "UPDATING LOCATION MOFO :: "+index);
+    private void updateLocation(final Double[] predictions) {
+        Log.e("onLocation", "UPDATING LOCATION MOFO :: ");
+
+        mChart.getScatterData();
     }
 
     private void setRadarData(final Map<String, Double> predictions) {
