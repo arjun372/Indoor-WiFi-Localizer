@@ -318,7 +318,7 @@ public class Fragment_IndoorMap extends Fragment {
             System.err.println("old color: " + c);
         }
 
-        oldColors.set(0, Color.BLUE);
+        oldColors.set(0, R.color.colorBlue);
         scatterDataSet.setColors(oldColors);
 
 
