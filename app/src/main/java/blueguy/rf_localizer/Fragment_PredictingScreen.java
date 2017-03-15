@@ -94,7 +94,17 @@ public class Fragment_PredictingScreen extends Fragment {
         public void run() {
             final Long now = System.currentTimeMillis();
             final Long past = now - predictionTimeoutHistoryMs;
+
+
+            System.err.println("PREDICTION REQUEST accumulated data: " + mAccumulatedDataAndLabels.toString());
+
             final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = mIndoorMap.predictOnData(mAccumulatedDataAndLabels);
+
+            System.err.println("PREDICTION REQUEST RETURN: " + distributionsWithData.toString());
+
+            System.err.println();
+
+
             if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
 
             final Map<String, Double> distributions = distributionsWithData.second;
@@ -231,6 +241,8 @@ public class Fragment_PredictingScreen extends Fragment {
 
     private void setRadarData(final Map<String, Double> predictions) {
 
+        System.err.println("PREDICTIONS FOR RADAR DATA: " + predictions.toString());
+
         ArrayList<RadarEntry> predictVals = new ArrayList<>();
         for (final String label : predictions.keySet()) {
             predictVals.add(new RadarEntry(predictions.get(label).floatValue(), label));
@@ -252,6 +264,7 @@ public class Fragment_PredictingScreen extends Fragment {
 
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
+                System.err.println("PREDICTIONS OF ACTIVITIES: " + mActivities.toString());
                 return mActivities[(int) value % mActivities.length];
             }
         });
