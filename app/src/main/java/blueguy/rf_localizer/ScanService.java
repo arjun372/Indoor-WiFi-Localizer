@@ -32,7 +32,6 @@ public class ScanService extends Service {
     private static final String KEY_TIMESTAMP = "timestamp";
 
     private static final String MAP_UNKNOWN = "nowhere";
-    public static final String CLASS_UNKNOWN = "here";
 
 
     // TODO: Remove mDataBase HashMap
@@ -50,13 +49,10 @@ public class ScanService extends Service {
         return mDataBase;
     }
 
-    //
-
-
     private DataObjectClassifier mCurrDataObjectClassifier = null;
 
     private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
-    private String mCurrLabel = CLASS_UNKNOWN;
+    private String mCurrLabel = DataObjectClassifier.CLASS_UNKNOWN;
 
     private String mLocation = MAP_UNKNOWN;
 
@@ -66,7 +62,7 @@ public class ScanService extends Service {
     }
 
     public void resetCurrLabel() {
-        setCurrLabel(CLASS_UNKNOWN);
+        setCurrLabel(DataObjectClassifier.CLASS_UNKNOWN);
     }
 
     private void loadClassifier(final String location, final boolean train) {

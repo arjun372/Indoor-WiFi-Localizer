@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
@@ -18,11 +20,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //TODO : Start scan service here
-//        final Intent startServiceIntent = new Intent(this, ScanService.class);
-//        startService(startServiceIntent);
-
-
         // Set Layout
         // Set content view layout
         setContentView(R.layout.activity_main);
@@ -31,15 +28,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
 
-
         // Create fragment and inflate
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.main_fragment_container, new Fragment_TitleScreen())
                 .commit();
-
     }
-
 
     // ScanService binding and connection
     ServiceConnection mConnection = new ServiceConnection() {
@@ -58,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
             mScanService = null;
         }
     };
-
 
     public void bindScanService(final String location, final boolean train) {
         Intent intent = new Intent(this, ScanService.class);

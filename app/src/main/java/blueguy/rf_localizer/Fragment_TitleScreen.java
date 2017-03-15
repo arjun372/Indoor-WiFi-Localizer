@@ -27,8 +27,8 @@ public class Fragment_TitleScreen extends Fragment{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         // Set Layout
         // Set content view layout
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -38,29 +38,9 @@ public class Fragment_TitleScreen extends Fragment{
         Button predictButton = (Button) rootView.findViewById(R.id.main_button_predict);
         Button navigateButton = (Button) rootView.findViewById(R.id.main_button_navigate);
 
-        trainButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "Training button pressed.", Toast.LENGTH_SHORT).show();
-                mShowTrainingPicker();
-            }
-        });
-
-        predictButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
-                mShowPredictingPicker();
-            }
-        });
-
-        navigateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "Predicting button pressed.", Toast.LENGTH_SHORT).show();
-                mShowNavigationPicker();
-            }
-        });
+        trainButton.setOnClickListener(v -> mShowTrainingPicker());
+        predictButton.setOnClickListener(v -> mShowPredictingPicker());
+        navigateButton.setOnClickListener(v -> mShowNavigationPicker());
 
         return rootView;
     }
@@ -72,7 +52,6 @@ public class Fragment_TitleScreen extends Fragment{
                 .addToBackStack("Fragment_TitleScreen")
                 .commit();
     }
-
 
     private void mShowTrainingPicker() {
 
@@ -130,7 +109,7 @@ public class Fragment_TitleScreen extends Fragment{
                     public void onClick(DialogInterface dialog, int which) {
                         ListView listView = ((AlertDialog)dialog).getListView();
                         Object checkedItem = listView.getAdapter().getItem(listView.getCheckedItemPosition());
-                        mChangeFragment(IndoorMap.newInstance((String)checkedItem));
+                        mChangeFragment(Fragment_IndoorMap.newInstance((String)checkedItem));
                     }
                 })
                 .show();

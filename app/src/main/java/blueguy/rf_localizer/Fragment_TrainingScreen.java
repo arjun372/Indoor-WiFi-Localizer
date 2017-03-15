@@ -1,9 +1,9 @@
 package blueguy.rf_localizer;
 
-
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,21 +12,47 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import blueguy.rf_localizer.Scanners.DataObject;
+import blueguy.rf_localizer.Scanners.Scanner;
+import blueguy.rf_localizer.Scanners.ScannerCallback;
+import blueguy.rf_localizer.Scanners.WifiScanner;
+import blueguy.rf_localizer.utils.DataPair;
+
+import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class Fragment_TrainingScreen extends Fragment {
 
-    private static final String KEY_LOCATION = ScanService.TAG_LOCATION;
-    private static final String KEY_TRAIN_CLF = ScanService.TAG_TRAIN_ACTION;
+    private static final String TAG = "Training_Activity";
 
-    private String mCurrLocation = "";
+    /** indoor-map related **/
+    private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
+    private String mGroundTruthLabel;
+    private IndoorMap mIndoorMap;
+
+    /** scanner related **/
+    private List<Scanner> mScannerList;
+
+    /** GUI related **/
+
+    private ScannerCallback mScannerCallback = new ScannerCallback() {
+        @Override
+        public void onScanResult(final List<DataObject> dataList) {
+            if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
+            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, mGroundTruthLabel)).collect(Collectors.toList()));
+        }
+    };
 
     public static Fragment_TrainingScreen newInstance(String location) {
         Bundle bundle = new Bundle();
-        bundle.putString(KEY_LOCATION, location);
-        bundle.putBoolean(KEY_TRAIN_CLF, true);
+        bundle.putString(IndoorMap.TAG_LOCATION, location);
+        bundle.putBoolean(IndoorMap.TAG_TRAIN_ACTION, true);
         Fragment_TrainingScreen fragment_trainingScreen = new Fragment_TrainingScreen();
         fragment_trainingScreen.setArguments(bundle);
         return fragment_trainingScreen;
@@ -37,65 +63,39 @@ public class Fragment_TrainingScreen extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mCurrLocation = getArguments().getString(KEY_LOCATION);
-        final boolean train = getArguments().getBoolean(KEY_TRAIN_CLF);
-        ((MainActivity)getActivity()).bindScanService(mCurrLocation, train);
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        ((MainActivity)getActivity()).unbindScanService();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_training_screen, container, false);
 
-
-        // TODO: Set up buttons and text views as necessary
-
-        // Location TextView
+        /* IndoorMap Name TextView */
         TextView locationTextView = (TextView) rootView.findViewById(R.id.training_screen_location_text_view);
-        locationTextView.setText(getArguments().getString(KEY_LOCATION));
+        locationTextView.setText(getArguments().getString(IndoorMap.TAG_LOCATION));
 
-        final EditText labelText = (EditText) rootView.findViewById(R.id.training_label_text);
+        /* Save reference to GroundTruth label */
+        EditText labelText = (EditText) rootView.findViewById(R.id.training_label_text);
 
         Button updateLabelButton = (Button) rootView.findViewById(R.id.button_update_label);
-        updateLabelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String label = labelText.getText().toString();
-                if (label.equals("?")) {
-                    Toast.makeText(getActivity(), "? is not a valid label", Toast.LENGTH_SHORT).show();
-                } else if (!label.isEmpty()) {
-                    ((MainActivity)getActivity()).mScanService.setCurrLabel(label);
-                    labelText.getText().clear();
-                }
+        updateLabelButton.setOnClickListener(v -> {
+            String label = labelText.getText().toString();
+            if (label.equals("?") || label.equals(DataObjectClassifier.CLASS_UNKNOWN)) {
+                Toast.makeText(getActivity(), label + " is not a valid label", Toast.LENGTH_SHORT).show();
+            } else if (!label.isEmpty()) {
+                setGroundTruthLabel(label);
+                labelText.getText().clear();
             }
         });
 
         Button clearLabelButton = (Button) rootView.findViewById(R.id.button_clear_label);
-        clearLabelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MainActivity)getActivity()).mScanService.resetCurrLabel();
-                labelText.getText().clear();
-            }
+        clearLabelButton.setOnClickListener(v -> {
+            resetGroundTruthLabel();
+            labelText.getText().clear();
         });
 
         Button finishTrainingButton = (Button) rootView.findViewById(R.id.button_finish_training);
-        finishTrainingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                labelText.getText().clear();
-                getActivity().onBackPressed();
-            }
+        finishTrainingButton.setOnClickListener(v -> {
+            labelText.getText().clear();
+            getActivity().onBackPressed();
         });
 
         return rootView;
@@ -104,7 +104,46 @@ public class Fragment_TrainingScreen extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        ((MainActivity)getActivity()).mScanService.trainClassifier();
-        ((MainActivity)getActivity()).mScanService.resetCurrLabel();
+        removeScanners();
+        resetGroundTruthLabel();
+        this.mIndoorMap.finishTraining(mAccumulatedDataAndLabels);
+        mAccumulatedDataAndLabels.clear();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAccumulatedDataAndLabels = new ArrayList<>();
+        resetGroundTruthLabel();
+        initIndoorMap();
+        initScanners();
+    }
+
+    private void resetGroundTruthLabel() {setGroundTruthLabel(DataObjectClassifier.CLASS_UNKNOWN);}
+    private void setGroundTruthLabel(final String newLabel) {
+        mGroundTruthLabel = newLabel;
+        Toast.makeText(getActivity(), "new label: " + mGroundTruthLabel, Toast.LENGTH_SHORT).show();
+    }
+    private void initScanners() {
+        if(DEBUG) Log.d(TAG, "initScanners");
+        this.mScannerList = new ArrayList<>();
+        this.mScannerList.add(new WifiScanner(mScannerCallback));
+        //curScanners.add(new CellScanner(mScannerCallback));
+        //curScanners.add(new BluetoothScanner(mScannerCallback));
+        //curScanners.add(new VelocityScanner(mScannerCallback));
+        //curScanners.add(new RotationScanner(mScannerCallback));
+        //curScanners.add(new MagneticFieldScanner(mScannerCallback));
+        //curScanners.add(new PressureScanner(mScannerCallback));
+        this.mScannerList.forEach(Scanner::startScan);
+    }
+    private void removeScanners() {
+        if(DEBUG) Log.d(TAG, "removeScanners");
+        // Stop scanning for each scanner and clear context to prevent memory leaks
+        this.mScannerList.forEach(Scanner::stopScan);
+        this.mScannerList.clear();
+    }
+    private void initIndoorMap() {
+        final String indoorMapName = getArguments().getString(IndoorMap.TAG_LOCATION);
+        this.mIndoorMap = new IndoorMap(indoorMapName);
     }
 }

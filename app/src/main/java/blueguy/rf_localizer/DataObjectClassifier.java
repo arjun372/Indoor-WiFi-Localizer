@@ -19,7 +19,6 @@ import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -39,11 +38,12 @@ public class DataObjectClassifier implements Serializable{
     private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     private static final String TAG = DataObjectClassifier.class.getSimpleName();
 
+    public static final String CLASS_UNKNOWN = "here";
+
     private static final String ATTRIBUTE_CLASS = "class";
 
     private static final long serialVersionUID = 3L;
 
-    //private
     private HashMap<String, Attribute> mFeatureSet = new HashMap<>();
 
     private List<DataPair<DataObject, String>> mLabeledRawData;
@@ -86,7 +86,7 @@ public class DataObjectClassifier implements Serializable{
         /** create a list of data with unknown labels **/
         for(DataPair singleData : data)
         {
-            singleData.second = ScanService.CLASS_UNKNOWN;
+            singleData.second = CLASS_UNKNOWN;
         }
 
         // convert list of unlabeled data to instances
@@ -172,7 +172,7 @@ public class DataObjectClassifier implements Serializable{
 
         if(updateLabels) {
             /* remove the unknown label from class values, it is meant to be implicit */
-            mClassLabels.remove(ScanService.CLASS_UNKNOWN);
+            mClassLabels.remove(CLASS_UNKNOWN);
         }
 
 
@@ -236,7 +236,7 @@ public class DataObjectClassifier implements Serializable{
             }
 
             /* update the class attribute value, or set to missing if it's equal to ScanService Unknown label */
-            if(label.equals(ScanService.CLASS_UNKNOWN))
+            if(label.equals(CLASS_UNKNOWN))
             {
                 previouslyStoredInstance.setClassMissing();
             }
