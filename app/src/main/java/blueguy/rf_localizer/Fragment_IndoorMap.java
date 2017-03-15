@@ -26,6 +26,7 @@ import com.github.mikephil.charting.interfaces.datasets.IScatterDataSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -122,7 +123,8 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 //                   index = i;
 //               }
 //            }
-            final Double[] values = (Double[]) distributions.values().toArray();
+//            final Double[] values = (Double[]) distributions.values().toArray();
+            List<Double> values = new ArrayList<>(distributions.values());
             updateLocation(values);
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
         }
@@ -230,10 +232,10 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 
     }
 
-    private void updateLocation(final Double[] predictions) {
-        Log.e("onLocation", "UPDATING LOCATION MOFO :: ");
+    private void updateLocation(final List<Double> predictions) {
+        Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
 
-        mChart.getScatterData();
+//        mChart.getScatterData();
     }
 
     private void setRadarData(final Map<String, Double> predictions) {
