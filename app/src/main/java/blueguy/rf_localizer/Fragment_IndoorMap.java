@@ -235,6 +235,8 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
     private void updateLocation(final List<Double> predictions) {
         Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
 
+
+
 //        mChart.getScatterData();
     }
 
@@ -351,7 +353,7 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 
         if(event.sensor.getType() == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
         {
-            final float calibratedBearing = (bearing.floatValue() + gyroBearing)/2;
+            final float calibratedBearing = ((bearing.floatValue() + gyroBearing)/2) - 12.1F;
             mChart.setRotation(calibratedBearing);
         }
 
