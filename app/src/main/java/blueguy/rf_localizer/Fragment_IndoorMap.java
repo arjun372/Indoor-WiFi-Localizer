@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.ScatterChart;
 import com.github.mikephil.charting.data.Entry;
@@ -60,7 +61,8 @@ public class Fragment_IndoorMap extends Fragment {
     private static final Long updatePredictionVibration = 200L;
 
     /** prediction related */
-    private static final Long predictionTimeoutHistoryMs = 10000L;
+//    private static final Long predictionTimeoutHistoryMs = 10000L;
+    private static final Long predictionTimeoutHistoryMs = 8000L;
     private Handler mPredictionRequestHandler = new Handler();
     private static final boolean ACCUMULATE = false;
 
@@ -208,14 +210,6 @@ public class Fragment_IndoorMap extends Fragment {
 //        mChart.setPinchZoom(false);
 
         ArrayList<Entry> locations = new ArrayList<>();
-//        locations.add(new Entry(0.15F, 0.15F, "3074"));
-//        locations.add(new Entry(0.25F, 0.15F));
-//        locations.add(new Entry(0.45F, 0.95F));
-//        locations.add(new Entry(0.55F, 0.95F));
-//        locations.add(new Entry(0.35F, 0.95F));
-//        locations.add(new Entry(0.0F, 0.95F));
-//        locations.add(new Entry(0.0F, 0.95F));
-//        locations.add(new Entry(0.0F, 0.95F));
 
         for (CoordinateNode node : graph.vertexSet()) {
             locations.add(new Entry(node.getXCoord(), node.getYCoord(), node.getLabel()));
@@ -233,19 +227,6 @@ public class Fragment_IndoorMap extends Fragment {
 
         //.setFillColor(Color.rgb(103, 110, 129));)
         set1.setDrawHighlightIndicators(false);
-
-
-        ArrayList<Entry> calibEntries = new ArrayList<>();
-        calibEntries.add(new Entry(0F, 0F));
-
-//        ScatterDataSet calSet = new ScatterDataSet(calibEntries, "calib");
-//        calSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-//        calSet.setColor(Color.BLUE, 180);
-//        calSet.setScatterShapeSize(16f);
-////        calSet.setScatterShapeSize(64f);
-//        calSet.setScatterShapeHoleColor(Color.BLUE);
-//        calSet.setScatterShapeHoleRadius(1f);
-//        calSet.setHighlightEnabled(true);
 
         ArrayList<IScatterDataSet> sets = new ArrayList<>();
         sets.add(set1);
@@ -313,13 +294,34 @@ public class Fragment_IndoorMap extends Fragment {
         ScatterData scatterData = mChart.getScatterData();
 
         ScatterDataSet scatterDataSet = (ScatterDataSet) scatterData.getDataSetByLabel("boelter 3rd floor", true);
-        List<Integer> oldColors = scatterDataSet.getColors();
-        for (int c : oldColors) {
-            System.err.println("old color: " + c);
+//        List<Integer> oldColors = scatterDataSet.getColors();
+//        for (int c : oldColors) {
+//            System.err.println("old color: " + c);
+
+        Toast.makeText(getActivity(), "len: " + scatterDataSet.getEntryCount(), Toast.LENGTH_SHORT).show();
+//        }
+
+        List<Integer> newcolors = new ArrayList<>();
+
+        newcolors.add(R.color.colorBlue);
+
+        for (int i = 1; i < 10; ++i) {
+            newcolors.add(R.color.colorRed);
         }
 
-        oldColors.set(0, R.color.colorBlue);
-        scatterDataSet.setColors(oldColors);
+        int[] colors = new int[10];
+        colors[0] = R.color.colorBlue;
+        for (int i = 1; i < 10; ++i ) {
+            colors[i] = R.color.colorRed;
+        }
+        scatterDataSet.setColors(colors, getActivity());
+
+        for (int i : scatterDataSet.getColors()) {
+            Toast.makeText(getActivity(), "new color: " + i, Toast.LENGTH_SHORT).show();
+        }
+        Toast.makeText(getActivity(), "new colors len: " + scatterDataSet.getColors().size(), Toast.LENGTH_SHORT).show();
+
+        mChart.invalidate();
 
 
 //        System.err.println("Colors: OLD:  " + scatterData.getColors().toString());
