@@ -313,17 +313,25 @@ public class Fragment_IndoorMap extends Fragment {
         ScatterData scatterData = mChart.getScatterData();
 
         System.err.println("Colors: OLD:  " + scatterData.getColors().toString());
+        System.err.println("Colors: OLD: length:  " + scatterData.getColors().length);
+        for (int i : scatterData.getColors()) {
+            System.err.println("color: " + i);
+        }
         List<Integer> colors = new ArrayList<>();
         for (int col : scatterData.getColors()) {
             colors.add(col);
         }
 
+
         colors.set(0, Color.BLUE);
         System.err.println("Colors: NEW:  " + colors.toString());
+        for (int i : colors) {
+            System.err.println("color: " + i);
+        }
 
         scatterData.setValueTextColors(colors);
 //        scatterData.getDataSetByLabel("3704", true).setValueTextColor(Color.GREEN);
-        mChart.setData(scatterData);
+//        mChart.setData(scatterData);
 
 //        mChart.getScatterData();
     }
