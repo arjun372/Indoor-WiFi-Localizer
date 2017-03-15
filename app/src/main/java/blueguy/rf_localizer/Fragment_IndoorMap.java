@@ -2,6 +2,7 @@ package blueguy.rf_localizer;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -54,7 +55,8 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
  * and polygons to represent areas.
  */
 
-public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
+//public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
+public class Fragment_IndoorMap extends Fragment {
 
 
     private static final String TAG = "Predicting_Fragment";
@@ -166,7 +168,7 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
     @Override
     public void onPause() {
         super.onPause();
-        syncBearing(false);
+//        syncBearing(false);
         mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
         removeScanners();
         resetPredictedLabel();
@@ -180,7 +182,7 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         resetPredictedLabel();
         initIndoorMap();
         initScanners();
-        syncBearing(true);
+//        syncBearing(true);
         mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
     }
 
@@ -328,45 +330,45 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         final String indoorMapName = getArguments().getString(IndoorMap.TAG_LOCATION);
         this.mIndoorMap = new IndoorMap(indoorMapName);
     }
-    private void syncBearing(final boolean state) {
-        final SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        final Sensor orientationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
-        final Sensor orientationSensor2 = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        if(state) {
-            sensorManager.registerListener(this, orientationSensor, SensorManager.SENSOR_DELAY_FASTEST);
-            sensorManager.registerListener(this, orientationSensor2, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        else
-            sensorManager.unregisterListener(this);
-    }
-
-    float gyroBearing = 0.0F;
-
-    @Override
-    public synchronized void onSensorChanged(SensorEvent event) {
-
-        float[] rotMatrix = new float[9];
-        float[] orientation = new float[3];
-        SensorManager.getRotationMatrixFromVector(rotMatrix, event.values);
-        SensorManager.getOrientation(rotMatrix, orientation);
-        final Double bearing = Math.toDegrees(orientation[0]);
-
-        if(event.sensor.getType() == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
-        {
-            final float calibratedBearing = (bearing.floatValue()) - 12.1F;
-//            final float calibratedBearing = ((bearing.floatValue() + gyroBearing)/2) - 12.1F;
-            mChart.setRotation(calibratedBearing);
-        }
-
-//        if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
-//        {
-//            gyroBearing = bearing.floatValue();
+//    private void syncBearing(final boolean state) {
+//        final SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+//        final Sensor orientationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
+//        final Sensor orientationSensor2 = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+//        if(state) {
+//            sensorManager.registerListener(this, orientationSensor, SensorManager.SENSOR_DELAY_FASTEST);
+//            sensorManager.registerListener(this, orientationSensor2, SensorManager.SENSOR_DELAY_FASTEST);
 //        }
-    }
+//        else
+//            sensorManager.unregisterListener(this);
+//    }
 
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
+//    float gyroBearing = 0.0F;
+//    @Override
+//    public synchronized void onSensorChanged(SensorEvent event) {
+//
+//        float[] rotMatrix = new float[9];
+//        float[] orientation = new float[3];
+//        SensorManager.getRotationMatrixFromVector(rotMatrix, event.values);
+//        SensorManager.getOrientation(rotMatrix, orientation);
+//        final Double bearing = Math.toDegrees(orientation[0]);
+//
+//        if(event.sensor.getType() == Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
+//        {
+////            new GeomagneticField()
+//            final float calibratedBearing = (bearing.floatValue()) - 12.1F;
+////            final float calibratedBearing = ((bearing.floatValue() + gyroBearing)/2) - 12.1F;
+//            mChart.setRotation(calibratedBearing);
+//        }
+//
+////        if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+////        {
+////            gyroBearing = bearing.floatValue();
+////        }
+//    }
+//
+//
+//    @Override
+//    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//
+//    }
 }
