@@ -1,9 +1,16 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="blueguy.rf_localizer.Fragment_IndoorMap">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/floor_plan_boelter_3rd_floor"
+        android:scaleType="fitXY"
+        />
 
     <com.github.mikephil.charting.charts.ScatterChart
         android:id="@+id/chart1"
@@ -14,4 +21,4 @@
     <!--android:layout_height="0dp"
     android:layout_weight="43.69" -->
 
-</LinearLayout>
+</RelativeLayout>
