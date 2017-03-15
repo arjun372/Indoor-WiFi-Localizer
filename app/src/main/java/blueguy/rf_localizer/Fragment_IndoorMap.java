@@ -226,7 +226,7 @@ public class Fragment_IndoorMap extends Fragment {
         ScatterDataSet set1 = new ScatterDataSet(locations, "boelter 3rd floor");
         set1.setColor(Color.RED, 180);
         set1.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
-        set1.setScatterShapeSize(16f);
+        set1.setScatterShapeSize(42f);
         set1.setScatterShapeHoleColor(Color.RED);
         set1.setScatterShapeHoleRadius(1f);
         set1.setHighlightEnabled(true);
