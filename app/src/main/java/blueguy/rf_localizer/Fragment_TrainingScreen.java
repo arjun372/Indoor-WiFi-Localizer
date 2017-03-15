@@ -134,12 +134,17 @@ public class Fragment_TrainingScreen extends Fragment {
         //curScanners.add(new RotationScanner(mScannerCallback));
         //curScanners.add(new MagneticFieldScanner(mScannerCallback));
         //curScanners.add(new PressureScanner(mScannerCallback));
-        this.mScannerList.forEach(Scanner::startScan);
+        for(Scanner x : this.mScannerList)
+        {
+            x.startScan();
+        }
     }
     private void removeScanners() {
         if(DEBUG) Log.d(TAG, "removeScanners");
-        // Stop scanning for each scanner and clear context to prevent memory leaks
-        this.mScannerList.forEach(Scanner::stopScan);
+        for(Scanner x : this.mScannerList)
+        {
+            x.stopScan();
+        }
         this.mScannerList.clear();
     }
     private void initIndoorMap() {

@@ -73,7 +73,8 @@ public class Fragment_PredictingScreen extends Fragment {
         @Override
         public void onScanResult(final List<DataObject> dataList) {
             if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
-            mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
+            for(DataObject dataObject : dataList) mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN));
+            //mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
         }
     };
 
@@ -281,11 +282,17 @@ public class Fragment_PredictingScreen extends Fragment {
         //curScanners.add(new RotationScanner(mScannerCallback));
         //curScanners.add(new MagneticFieldScanner(mScannerCallback));
         //curScanners.add(new PressureScanner(mScannerCallback));
-        this.mScannerList.forEach(Scanner::startScan);
+        for(Scanner x : this.mScannerList)
+        {
+            x.startScan();
+        }
     }
     private void removeScanners() {
         if(DEBUG) Log.d(TAG, "removeScanners");
-        this.mScannerList.forEach(Scanner::stopScan);
+        for(Scanner x : this.mScannerList)
+        {
+            x.stopScan();
+        }
         this.mScannerList.clear();
     }
     private void initIndoorMap() {

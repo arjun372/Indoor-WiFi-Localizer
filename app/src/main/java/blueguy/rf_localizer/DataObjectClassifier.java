@@ -117,7 +117,16 @@ public class DataObjectClassifier implements Serializable{
 //
 //    }
     private static <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
-        return IntStream.range(0, keys.size()).boxed().collect(Collectors.toMap(keys::get, values::get));
+
+        Map<K,V> newMap = new HashMap<K, V>();
+
+        for(int i=0; i < keys.size(); i++)
+        {
+            newMap.put(keys.get(i), values.get(i));
+        }
+
+        return newMap;
+//        return IntStream.range(0, keys.size()).boxed().collect(Collectors.toMap(keys::get, values::get));
     }
 
     private Instances convertDataObjectToInstances(final List<DataPair<DataObject, String>> dataWithLabels) {

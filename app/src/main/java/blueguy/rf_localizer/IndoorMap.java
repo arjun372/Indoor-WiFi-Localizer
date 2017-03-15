@@ -78,17 +78,19 @@ public class IndoorMap implements Serializable{
         Log.v(TAG, "Predicting");
         final Map<String, Double> predictions = this.mClassifer.classify(dataWithLabels);
         return new DataPair<> (dataWithLabels, predictions);
-        //List<DataPair<DataObject, String>>, Map<String, Double>
     }
 
     public void retrainWithData(final List<DataPair<DataObject, String>> dataWithLabels) {
         this.mRawData.addAll(dataWithLabels);
         try {
             this.mClassifer.update(dataWithLabels);
+            Log.v("retrainWithData", "Was able to update the classifier without rebuilding. Good job bud");
         } catch(Exception e) {
             Log.d("retrainWithData", "Unable to retrain, saw some new attributes, rebuilding");
             this.mClassifer = buildClassifier(this.mRawData, this.mMapName);
         }
+        // also save raw data list to file -> you need to make the classifier persist.
+        saveRawDataToFile(this.mMapName);
     }
 
     private static List<DataPair<DataObject, String>> loadRawDataFromFile(final String filename) {
