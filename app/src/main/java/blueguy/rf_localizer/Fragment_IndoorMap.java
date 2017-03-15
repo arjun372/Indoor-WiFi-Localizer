@@ -301,6 +301,14 @@ public class Fragment_IndoorMap extends Fragment {
         Toast.makeText(getActivity(), "len: " + scatterDataSet.getEntryCount(), Toast.LENGTH_SHORT).show();
 //        }
 
+        int index = 0;
+        Double probability = 0.0;
+
+        for (int i = 0; i < predictions.size(); i++) {
+            if(predictions.get(i) > probability)
+                index = i;
+        }
+
         List<Integer> newcolors = new ArrayList<>();
 
         newcolors.add(R.color.colorBlue);
