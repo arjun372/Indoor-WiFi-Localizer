@@ -191,7 +191,7 @@ public class Fragment_IndoorMap extends Fragment {
 
         mChart.getDescription().setEnabled(false);
         mChart.setBackgroundColor(Color.TRANSPARENT); //set whatever color you prefer
-        mChart.setBackgroundResource(R.drawable.floor_plan_Boelter_3rd_Floor);
+        mChart.setBackgroundResource(R.drawable.floor_plan_boelter_3rd_floor);
         mChart.setDrawGridBackground(false);
 
         XAxis xAxis = mChart.getXAxis();
