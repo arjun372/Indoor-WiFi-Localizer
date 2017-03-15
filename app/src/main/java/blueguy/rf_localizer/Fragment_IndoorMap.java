@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.ScatterChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
@@ -201,9 +202,11 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.getAxisRight().setAxisMinimum(0F);
         mChart.getAxisRight().setAxisMaximum(1F);
 
+        mChart.setDescription(new Description());
         mChart.getLegend().setEnabled(false);
         mChart.getAxisLeft().setDrawLabels(false);
         mChart.getAxisRight().setDrawLabels(false);
+        mChart.getXAxis().setDrawLabels(false);
 
         mChart.fitScreen();
 
