@@ -2,13 +2,16 @@ package blueguy.rf_localizer.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,6 +29,7 @@ import java.util.zip.GZIPOutputStream;
 public class PersistentMemoryManager {
 
     private static final String KEY_LOCATIONS_LIST = "locations_list";
+    private static final String TAG = "RF_Localizer";
 
 
     private static final void putStringCollection(Context context, String key, Collection<String > vals) {
@@ -52,18 +56,26 @@ public class PersistentMemoryManager {
         putStringCollection(context, KEY_LOCATIONS_LIST, prevSet);
     }
 
-    public static final Object loadObjectFile(final String classifierName) throws IOException, ClassNotFoundException {
-        final File inputFile = new File(Environment.getExternalStorageDirectory(), classifierName+".dat");
-        ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(inputFile));
+    public static final Object loadObjectFile(final String objectFileName) throws IOException, ClassNotFoundException {
+        final File inputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG, objectFileName+".dat");
+        ObjectInputStream objectInputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
         Object object = objectInputStream.readObject();
         objectInputStream.close();
         return object;
     }
 
-    public static final void saveObjectFile(final String classifierName, Object object) throws IOException {
-        final File outputFile = new File(Environment.getExternalStorageDirectory(), classifierName+".dat");
+    public static final void saveObjectFile(final String objectFileName, Object object) throws IOException {
+        final File parentDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG);
+        parentDir.mkdirs();
+        final File outputFile = new File(parentDir, objectFileName+".dat");
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
         objectOutputStream.writeObject(object);
         objectOutputStream.close();
+    }
+
+    public static FileWriter getFileWriter(final String fileName) throws IOException{
+        final File parentDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG);
+        parentDir.mkdirs();
+        return new FileWriter(new File(parentDir, fileName));
     }
 }

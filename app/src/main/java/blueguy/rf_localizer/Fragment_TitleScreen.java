@@ -38,9 +38,26 @@ public class Fragment_TitleScreen extends Fragment{
         Button predictButton = (Button) rootView.findViewById(R.id.main_button_predict);
         Button navigateButton = (Button) rootView.findViewById(R.id.main_button_navigate);
 
-        trainButton.setOnClickListener(v -> mShowTrainingPicker());
-        predictButton.setOnClickListener(v -> mShowPredictingPicker());
-        navigateButton.setOnClickListener(v -> mShowNavigationPicker());
+        trainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowTrainingPicker();
+            }
+        });
+
+        predictButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowPredictingPicker();
+            }
+        });
+
+        navigateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mShowNavigationPicker();
+            }
+        });
 
         return rootView;
     }

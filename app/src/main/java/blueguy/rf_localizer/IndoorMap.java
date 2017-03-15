@@ -26,7 +26,7 @@ public class IndoorMap implements Serializable{
     public static final String TAG_LOCATION     = "location";
     public static final String TAG_TRAIN_ACTION = "train";
 
-    private List<DataPair<DataObject, String>> mCurrentRawData;
+    private List<DataPair<DataObject, String>> mRawData;
 
     private DataObjectClassifier mClassifer;
 
@@ -40,52 +40,71 @@ public class IndoorMap implements Serializable{
 
     private String mMapName;
 
-    private String mLastPrediction;
-
-    public String getCurrentLocation() {
-        return mLastPrediction;
-    }
-
     public IndoorMap(String mapName) {
-        this.mMapName = mapName;
-        this.mClassifer = loadClassifierFromFile(this.mMapName);
+        this.mMapName     = mapName;
+      //  this.mVisualGraph = loadGraphFromRawFiles();
+      //  this.mImageFile   = loadImageFromRawFile();
+
+        this.mRawData   = loadRawDataFromFile(this.mMapName);
+        this.mClassifer = buildClassifier(this.mRawData, this.mMapName);
     }
 
     public IndoorMap(String mapName, ListenableGraph mVisualGraph, File imageFile) {
         this.mMapName = mapName;
         this.mVisualGraph = mVisualGraph;
         this.mImageFile = imageFile;
-        //this.mClassifer =
     }
 
-    private void buildClassifier(final List<DataPair<DataObject, String>> dataWithLabels) {
-        this.mClassifer = new DataObjectClassifier(dataWithLabels, this.mMapName);
+    private static DataObjectClassifier buildClassifier(final List<DataPair<DataObject, String>> dataWithLabels, final String clfName) {
+        return new DataObjectClassifier(dataWithLabels, clfName);
     }
 
-    private static DataObjectClassifier loadClassifierFromFile(final String mapName) {
-        try {
-             return (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(mapName+".clf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public void finishTraining(final List<DataPair<DataObject, String>> dataWithLabels) {
         Log.v(TAG, "Training on :" + dataWithLabels.toString());
+
+        retrainWithData(dataWithLabels);
+
+        saveRawDataToFile(this.mMapName);
+
+       // Log.v(TAG, "Saving to ARFF");
+      //  this.mClassifer.InstancesToArff();
+
         //TODO :: do everything that scanservice.trainclassifier does
         //TODO :: plus save yourself, who knows when you will be back?
     }
 
     public DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictOnData(final List<DataPair<DataObject, String>> dataWithLabels) {
-        Log.v(TAG, "Predicting on :" + dataWithLabels.toString());
-        return null;
+        Log.v(TAG, "Predicting");
+        final Map<String, Double> predictions = this.mClassifer.classify(dataWithLabels);
+        return new DataPair<> (dataWithLabels, predictions);
+        //List<DataPair<DataObject, String>>, Map<String, Double>
     }
 
     public void retrainWithData(final List<DataPair<DataObject, String>> dataWithLabels) {
-       // TODO :: Implement this !
-        // ((MainActivity)getActivity()).mScanService.updateClassifierData(unLabeledData);
+        this.mRawData.addAll(dataWithLabels);
+        try {
+            this.mClassifer.update(dataWithLabels);
+        } catch(Exception e) {
+            Log.d("retrainWithData", "Unable to retrain, saw some new attributes, rebuilding");
+            this.mClassifer = buildClassifier(this.mRawData, this.mMapName);
+        }
     }
 
+    private static List<DataPair<DataObject, String>> loadRawDataFromFile(final String filename) {
+        try {
+            return (List<DataPair<DataObject, String>>) PersistentMemoryManager.loadObjectFile(filename + ".raw");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    private void saveRawDataToFile(final String filename) {
+        try {
+            PersistentMemoryManager.saveObjectFile(filename + ".raw", this.mRawData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

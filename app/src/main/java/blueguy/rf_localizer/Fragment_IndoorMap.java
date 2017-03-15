@@ -95,21 +95,21 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
         ((MainActivity)getActivity()).unbindScanService();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        // TODO :: What happens when you exit navigation?
-        ((MainActivity)getActivity()).mScanService.resetCurrLabel();
-        mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // TODO :: What happens when you start navigation?
-        //updateLabel(UNKNOWN);
-        mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
-    }
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        // TODO :: What happens when you exit navigation?
+//        ((MainActivity)getActivity()).mScanService.resetCurrLabel();
+//        mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        // TODO :: What happens when you start navigation?
+//        //updateLabel(UNKNOWN);
+//        mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -140,49 +140,49 @@ public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
 
 
 
-    private Runnable mPredictionRequest = new Runnable() {
-        @Override
-        public void run() {
-            final Long now = System.currentTimeMillis();
-            final Long past = now - predictionTimeoutHistoryMs;
-            final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = ((MainActivity)getActivity()).mScanService.predictOnData(false);
-            final Map<String, Double> distributions = distributionsWithData.second;
-
-            setRadarData(distributions);
-
-            if(DEBUG)
-            {
-                for(final String location : distributions.keySet())
-                {
-                    Log.d("PREDICTIONS", location + " : " + distributions.get(location));
-                }
-            }
-
-            final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
-            updateLabel(predictedLabel);
-
-            yesButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    final String currentLabel = predictLabelTextView.getText().toString();
-                    List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
-                    for(DataPair singleData : unLabeledData) singleData.second = currentLabel;
-                    ((MainActivity)getActivity()).mScanService.updateClassifierData(unLabeledData);
-                }
-            });
-
-            noButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    final List<String> labels = new ArrayList<>(distributions.keySet());
-                    labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx+1;
-
-                    if(labelIdx < labels.size())
-                        updateLabel(labels.get(labelIdx));
-                }
-            });
-
-            mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
-        }
-    };
+//    private Runnable mPredictionRequest = new Runnable() {
+//        @Override
+//        public void run() {
+//            final Long now = System.currentTimeMillis();
+//            final Long past = now - predictionTimeoutHistoryMs;
+//            //final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = ((MainActivity)getActivity()).mScanService.predictOnData(false);
+//            final Map<String, Double> distributions = distributionsWithData.second;
+//
+//            setRadarData(distributions);
+//
+//            if(DEBUG)
+//            {
+//                for(final String location : distributions.keySet())
+//                {
+//                    Log.d("PREDICTIONS", location + " : " + distributions.get(location));
+//                }
+//            }
+//
+//            final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
+//            updateLabel(predictedLabel);
+//
+//            yesButton.setOnClickListener(new View.OnClickListener() {
+//                public void onClick(View v) {
+//                    final String currentLabel = predictLabelTextView.getText().toString();
+//                    List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
+//                    for(DataPair singleData : unLabeledData) singleData.second = currentLabel;
+//                    ((MainActivity)getActivity()).mScanService.updateClassifierData(unLabeledData);
+//                }
+//            });
+//
+//            noButton.setOnClickListener(new View.OnClickListener() {
+//                public void onClick(View v) {
+//                    final List<String> labels = new ArrayList<>(distributions.keySet());
+//                    labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx+1;
+//
+//                    if(labelIdx < labels.size())
+//                        updateLabel(labels.get(labelIdx));
+//                }
+//            });
+//
+//            mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+//        }
+//    };
 
     private void initMapChart() {
 

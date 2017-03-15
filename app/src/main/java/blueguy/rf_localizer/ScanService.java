@@ -65,18 +65,18 @@ public class ScanService extends Service {
         setCurrLabel(DataObjectClassifier.CLASS_UNKNOWN);
     }
 
-    private void loadClassifier(final String location, final boolean train) {
-        mLocation = location;
-        try {
-            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(location);
-            mAccumulatedDataAndLabels = train ? mCurrDataObjectClassifier.getRawData() : new ArrayList<>();
-            Log.e(TAG, "successfully loaded mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            mCurrDataObjectClassifier = null;
-            mAccumulatedDataAndLabels = new ArrayList<>();
-        }
-    }
+//    private void loadClassifier(final String location, final boolean train) {
+//        mLocation = location;
+//        try {
+//            mCurrDataObjectClassifier = (DataObjectClassifier) PersistentMemoryManager.loadObjectFile(location);
+//            mAccumulatedDataAndLabels = train ? mCurrDataObjectClassifier.getRawData() : new ArrayList<>();
+//            Log.e(TAG, "successfully loaded mAccumlated labels [size] : " + mAccumulatedDataAndLabels.size());
+//        } catch (IOException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//            mCurrDataObjectClassifier = null;
+//            mAccumulatedDataAndLabels = new ArrayList<>();
+//        }
+//    }
 
 
     public void trainClassifier() {
@@ -127,7 +127,7 @@ public class ScanService extends Service {
         }
         else
         {
-           loadClassifier(location, train);
+          // loadClassifier(location, train);
         }
 
         resetCurrLabel();
@@ -218,24 +218,24 @@ public class ScanService extends Service {
         return START_NOT_STICKY;
     }
 
-    public DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictOnData(final boolean accumulate) {
-        final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictions = predict();
-        if(!accumulate) mAccumulatedDataAndLabels = new ArrayList<>();
-        return predictions;
-    }
-
-    private DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predict() {
-        if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
-        final Map<String, Double> predictions = mCurrDataObjectClassifier.classify(mAccumulatedDataAndLabels);
-        return new DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> (mAccumulatedDataAndLabels, predictions);
-    }
-
-    public void updateClassifierData(final List<DataPair<DataObject, String>> labeledData) {
-        if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
-        mCurrDataObjectClassifier.retrainClassifier(labeledData);
-        try{
-            PersistentMemoryManager.saveObjectFile(mLocation, mCurrDataObjectClassifier);
-            Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mCurrDataObjectClassifier.getRawData().size());
-        } catch (Exception e) {e.printStackTrace();}
-    }
+//    public DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictOnData(final boolean accumulate) {
+//        final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predictions = predict();
+//        if(!accumulate) mAccumulatedDataAndLabels = new ArrayList<>();
+//        return predictions;
+//    }
+//
+//    private DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> predict() {
+//        if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
+//        final Map<String, Double> predictions = mCurrDataObjectClassifier.classify(mAccumulatedDataAndLabels);
+//        return new DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> (mAccumulatedDataAndLabels, predictions);
+//    }
+//
+//    public void updateClassifierData(final List<DataPair<DataObject, String>> labeledData) {
+//        if(mCurrDataObjectClassifier == null) loadClassifier(mLocation, false);
+//        mCurrDataObjectClassifier.retrainClassifier(labeledData);
+//        try{
+//            PersistentMemoryManager.saveObjectFile(mLocation, mCurrDataObjectClassifier);
+//            Log.e(TAG, "successfully saved mAccumlated labels [size] : " + mCurrDataObjectClassifier.getRawData().size());
+//        } catch (Exception e) {e.printStackTrace();}
+//    }
 }

@@ -18,7 +18,8 @@ import java.util.stream.IntStream;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -38,6 +39,8 @@ public class DataObjectClassifier implements Serializable{
     private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     private static final String TAG = DataObjectClassifier.class.getSimpleName();
 
+    private Instances dataInstances;
+
     public static final String CLASS_UNKNOWN = "here";
 
     private static final String ATTRIBUTE_CLASS = "class";
@@ -46,34 +49,16 @@ public class DataObjectClassifier implements Serializable{
 
     private HashMap<String, Attribute> mFeatureSet = new HashMap<>();
 
-    private List<DataPair<DataObject, String>> mLabeledRawData;
-
     private HashSet<String> mClassLabels = new HashSet<>();
+
+    private UpdateableClassifier mClassifier;
 
     private String mClassifierName;
 
-    private Classifier mClassifier;
-
-
-    public List<DataPair<DataObject, String>> getRawData() {
-        return mLabeledRawData;
-    }
-
-    public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, String locationName) {
-        this.mClassifierName = locationName.trim().replaceAll(" ", "");
-        retrainClassifier(dataWithLabels);
-    }
-
-    public void retrainClassifier(final List<DataPair<DataObject, String>> dataWithLabels) {
-
-        /* save data for future use */
-        updateRawData(dataWithLabels);
-
-        final Instances dataInstances = convertDataObjectToInstances(this.mLabeledRawData);
-        this.mClassifier = buildClassifier(dataInstances);
-
-        /* save instances to arff for inspection with weka GUI */
-        if(DEBUG) InstancesToArff(dataInstances);
+    public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, final String clfName) {
+        this.dataInstances = convertDataObjectToInstances(dataWithLabels);
+        this.mClassifier   = buildClassifier(dataInstances);
+        this.mClassifierName = clfName;
     }
 
     /**
@@ -95,7 +80,8 @@ public class DataObjectClassifier implements Serializable{
 
         /** create an accumulator map with size equal to @mClassLabels, and set it to zero **/
         ArrayList<Double> accumulatedDistributions = new ArrayList<>();
-        mClassLabels.forEach(eachLabel -> accumulatedDistributions.add(0.0));
+        for(final String label : mClassLabels) accumulatedDistributions.add(0.0);
+//        mClassLabels.forEach(eachLabel -> accumulatedDistributions.add(0.0));
 
         //if(DEBUG) System.err.println(mClassifier.toString());
 
@@ -103,7 +89,7 @@ public class DataObjectClassifier implements Serializable{
         for(final Instance singleInstance : toPredictOn)
         {
             try {
-                final double[] distributions = mClassifier.distributionForInstance(singleInstance);
+                final double[] distributions = ((Classifier) mClassifier).distributionForInstance(singleInstance);
                 for(int i = 0; i < distributions.length; i++)
                 {
                     accumulatedDistributions.set(i, accumulatedDistributions.get(i) + distributions[i]);
@@ -291,15 +277,14 @@ public class DataObjectClassifier implements Serializable{
         return dataInstances;
     }
 
-    @Override
-    public String toString() {
-        return "DataObjectClassifier{" +
-                "mLabeledRawData=" + mLabeledRawData +
-                ", mClassifier=" + mClassifier +
-                '}';
+
+    public void update(final List<DataPair<DataObject, String>> newData) throws Exception{
+        final Instances newInstances = convertDataObjectToInstances(newData);
+        if(DEBUG) Log.d("updateClassifier", "Attempting to update CLF with instances :"+newInstances.size());
+        for(final Instance instance : newInstances) mClassifier.updateClassifier(instance);
     }
 
-    private static weka.classifiers.Classifier buildClassifier(Instances structure) {
+    private static weka.classifiers.UpdateableClassifier buildClassifier(Instances structure) {
 
         Log.v(TAG, "Builiding classifier using "+structure.numInstances()+" instances...");
 
@@ -312,7 +297,7 @@ public class DataObjectClassifier implements Serializable{
         structure = balanceClasses(structure);
 
 
-        NaiveBayes classifier = new NaiveBayes();
+        NaiveBayesUpdateable classifier = new NaiveBayesUpdateable();
 
         try {
 
@@ -320,7 +305,6 @@ public class DataObjectClassifier implements Serializable{
             classifier.setUseSupervisedDiscretization(false);
             classifier.setDisplayModelInOldFormat(false);
             classifier.setUseKernelEstimator(true);
-//            classifier.setNumTrees(10);
             classifier.setDebug(DEBUG);
 
             /* build mClassifier with given instances */
@@ -335,9 +319,9 @@ public class DataObjectClassifier implements Serializable{
         return classifier;
     }
 
-    private boolean InstancesToArff(final Instances dataSet) {
+    public boolean InstancesToArff() {
         ArffSaver saver = new ArffSaver();
-        saver.setInstances(dataSet);
+        saver.setInstances(this.dataInstances);
         try {
             final File outputArff = new File(FS_rootDirectory + "/" + this.mClassifierName + ".arff.gz");
             saver.setCompressOutput(true);
@@ -365,9 +349,9 @@ public class DataObjectClassifier implements Serializable{
         return balanced;
     }
 
-    private void updateRawData(final List<DataPair<DataObject, String>> dataWithLabels) {
-        if(mLabeledRawData == null) mLabeledRawData = new ArrayList<>();
-        mLabeledRawData.addAll(new ArrayList<>(dataWithLabels));
-    }
+//    private void updateRawData(final List<DataPair<DataObject, String>> dataWithLabels) {
+//        if(mLabeledRawData == null) mLabeledRawData = new ArrayList<>();
+//        mLabeledRawData.addAll(new ArrayList<>(dataWithLabels));
+//    }
 }
 
