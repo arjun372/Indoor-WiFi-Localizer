@@ -200,19 +200,19 @@ public class Fragment_IndoorMap extends Fragment {
 
         UndirectedGraph<CoordinateNode, CoordinateEdge> graph = new SimpleGraph<>(CoordinateEdge.class);
         List<CoordinateNode> nodes = new ArrayList<>();
-        float totalX = 620;
-        float totalY = 705;
+        float totalX = 620F;
+        float totalY = 705F;
 
-        nodes.add(new CoordinateNode("3704", 470/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3714", 420/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3732D", 394/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3760", 75/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3770", 12/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3440", 513/totalX, 88/totalY));
-        nodes.add(new CoordinateNode("3436", 511/totalX, 121/totalY));
-        nodes.add(new CoordinateNode("3428", 511/totalX, 183/totalY));
-        nodes.add(new CoordinateNode("3420", 511/totalX, 300/totalY));
-        nodes.add(new CoordinateNode("3400", 511/totalX, 357/totalY));
+        nodes.add(new CoordinateNode("3704", 470F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3714", 420F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3732D", 394F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3760", 75F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3770", 12F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3440", 513F/totalX, 88F/totalY));
+        nodes.add(new CoordinateNode("3436", 511F/totalX, 121F/totalY));
+        nodes.add(new CoordinateNode("3428", 511F/totalX, 183F/totalY));
+        nodes.add(new CoordinateNode("3420", 511F/totalX, 300F/totalY));
+        nodes.add(new CoordinateNode("3400", 511F/totalX, 357F/totalY));
 
         for (CoordinateNode node : nodes) {
             graph.addVertex(node);
