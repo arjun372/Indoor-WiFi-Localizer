@@ -242,7 +242,8 @@ public class Fragment_IndoorMap extends Fragment {
         ScatterDataSet calSet = new ScatterDataSet(calibEntries, "calib");
         calSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE);
         calSet.setColor(Color.BLUE, 180);
-        calSet.setScatterShapeSize(64f);
+        calSet.setScatterShapeSize(16f);
+//        calSet.setScatterShapeSize(64f);
         calSet.setScatterShapeHoleColor(Color.BLUE);
         calSet.setScatterShapeHoleRadius(1f);
         calSet.setHighlightEnabled(true);
@@ -286,11 +287,13 @@ public class Fragment_IndoorMap extends Fragment {
 
         mChart.setScaleEnabled(false);
 
+        mChart.setPadding(0, 0, 0, 0);
+
+//        mChart.setViewPortOffsets(0f, 0f, 0f, 0f);
+
 
 //        mChart.offsetTopAndBottom(0);
 //        mChart.offsetLeftAndRight(0);
-
-        mChart.setViewPortOffsets(-40f, 0f, 0f, 0f);
 
 
 
