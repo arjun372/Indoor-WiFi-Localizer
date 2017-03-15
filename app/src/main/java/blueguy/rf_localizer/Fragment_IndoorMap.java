@@ -205,6 +205,10 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.getAxisLeft().setDrawLabels(false);
         mChart.getAxisRight().setDrawLabels(false);
 
+        mChart.fitScreen();
+
+        mChart.setScaleEnabled(false);
+
 
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextColor(Color.BLACK);

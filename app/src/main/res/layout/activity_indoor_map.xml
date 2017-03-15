@@ -8,7 +8,10 @@
     <com.github.mikephil.charting.charts.ScatterChart
         android:id="@+id/chart1"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="43.69" />
+        android:layout_height="match_parent"
+        />
+
+    <!--android:layout_height="0dp"
+    android:layout_weight="43.69" -->
 
 </LinearLayout>
