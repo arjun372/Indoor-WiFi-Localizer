@@ -310,14 +310,17 @@ public class Fragment_IndoorMap extends Fragment {
 
     private void updateLocation(final List<Double> predictions) {
         Log.e("onLocation", "UPDATING LOCATION MOFO :: " + predictions.toString());
-
         ScatterData scatterData = mChart.getScatterData();
+
+        System.err.println("Colors: OLD:  " + scatterData.getColors().toString());
         List<Integer> colors = new ArrayList<>();
         for (int col : scatterData.getColors()) {
             colors.add(col);
         }
 
         colors.set(0, Color.BLUE);
+        System.err.println("Colors: NEW:  " + colors.toString());
+
         scatterData.setValueTextColors(colors);
 //        scatterData.getDataSetByLabel("3704", true).setValueTextColor(Color.GREEN);
         mChart.setData(scatterData);
