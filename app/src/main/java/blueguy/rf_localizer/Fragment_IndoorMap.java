@@ -287,8 +287,10 @@ public class Fragment_IndoorMap extends Fragment {
         mChart.setScaleEnabled(false);
 
 
-        mChart.offsetTopAndBottom(0);
-        mChart.offsetLeftAndRight(0);
+//        mChart.offsetTopAndBottom(0);
+//        mChart.offsetLeftAndRight(0);
+
+        mChart.setViewPortOffsets(-40f, 0f, 0f, 0f);
 
 
 
