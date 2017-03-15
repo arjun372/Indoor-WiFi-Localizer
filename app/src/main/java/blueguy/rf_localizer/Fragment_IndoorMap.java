@@ -11,10 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.ScatterChart;
 import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
 import com.github.mikephil.charting.data.ScatterDataSet;
@@ -186,39 +184,6 @@ public class Fragment_IndoorMap extends Fragment {
     //TODO :: MpAndroidChart Libray : set image as background
     private void initRadarChart() {
 
-        mChart.getDescription().setEnabled(false);
-        mChart.setBackgroundColor(Color.TRANSPARENT); //set whatever color you prefer
-//        mChart.setBackgroundResource(R.drawable.floor_plan_boelter_3rd_floor);
-        mChart.setDrawGridBackground(false);
-
-        mChart.setPinchZoom(false);
-
-        mChart.getXAxis().setAxisMinimum(0F);
-        mChart.getXAxis().setAxisMaximum(1F);
-
-        mChart.getAxisLeft().setAxisMinimum(0F);
-        mChart.getAxisLeft().setAxisMaximum(1F);
-
-        mChart.getAxisRight().setAxisMinimum(0F);
-        mChart.getAxisRight().setAxisMaximum(1F);
-
-        mChart.setDescription(new Description());
-        mChart.getLegend().setEnabled(false);
-        mChart.getAxisLeft().setDrawLabels(false);
-        mChart.getAxisRight().setDrawLabels(false);
-        mChart.getXAxis().setDrawLabels(false);
-
-        mChart.fitScreen();
-
-        mChart.setScaleEnabled(false);
-
-
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setTextColor(Color.BLACK);
-        xAxis.setTextSize(0f);
-        xAxis.setYOffset(0f);
-        xAxis.setXOffset(0f);
-
         UndirectedGraph<CoordinateNode, CoordinateEdge> graph = new SimpleGraph<>(CoordinateEdge.class);
         List<CoordinateNode> nodes = new ArrayList<>();
         float totalX = 620F;
@@ -292,8 +257,50 @@ public class Fragment_IndoorMap extends Fragment {
         data.setValueTextColor(Color.WHITE);
 
         mChart.setData(data);
-        mChart.animateXY(500, 500, Easing.EasingOption.EaseInOutCirc, Easing.EasingOption.EaseInOutCirc);
+//        mChart.animateXY(500, 500, Easing.EasingOption.EaseInOutCirc, Easing.EasingOption.EaseInOutCirc);
 
+
+        mChart.getDescription().setEnabled(false);
+        mChart.setBackgroundColor(Color.TRANSPARENT); //set whatever color you prefer
+//        mChart.setBackgroundResource(R.drawable.floor_plan_boelter_3rd_floor);
+        mChart.setDrawGridBackground(false);
+
+        mChart.setPinchZoom(false);
+
+        mChart.getXAxis().setAxisMinimum(0F);
+        mChart.getXAxis().setAxisMaximum(1F);
+
+        mChart.getAxisLeft().setAxisMinimum(0F);
+        mChart.getAxisLeft().setAxisMaximum(1F);
+
+        mChart.getAxisRight().setAxisMinimum(0F);
+        mChart.getAxisRight().setAxisMaximum(1F);
+
+        mChart.setDescription(new Description());
+        mChart.getLegend().setEnabled(false);
+        mChart.getAxisLeft().setDrawLabels(false);
+        mChart.getAxisRight().setDrawLabels(false);
+        mChart.getXAxis().setDrawLabels(false);
+
+        mChart.fitScreen();
+
+        mChart.setScaleEnabled(false);
+
+
+        mChart.offsetTopAndBottom(0);
+        mChart.offsetLeftAndRight(0);
+
+
+
+        // Redraw
+        mChart.invalidate();
+
+
+//        XAxis xAxis = mChart.getXAxis();
+//        xAxis.setTextColor(Color.BLACK);
+//        xAxis.setTextSize(0f);
+//        xAxis.setYOffset(0f);
+//        xAxis.setXOffset(0f);
     }
 
     private void updateLocation(final List<Double> predictions) {
