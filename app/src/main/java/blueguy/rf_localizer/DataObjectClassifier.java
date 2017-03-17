@@ -4,6 +4,7 @@ import android.os.Environment;
 import android.util.Log;
 import java.io.File;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.stream.IntStream;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
+import blueguy.rf_localizer.utils.PersistentMemoryManager;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -36,7 +38,7 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
 public class DataObjectClassifier implements Serializable{
 
-    private static final String FS_rootDirectory = android.os.Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+    private static final String FS_rootDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
     private static final String TAG = DataObjectClassifier.class.getSimpleName();
 
     private Instances dataInstances;
@@ -58,7 +60,7 @@ public class DataObjectClassifier implements Serializable{
     public DataObjectClassifier(final List<DataPair<DataObject, String>> dataWithLabels, final String clfName) {
         this.dataInstances = convertDataObjectToInstances(dataWithLabels);
         this.mClassifier   = buildClassifier(dataInstances);
-        this.mClassifierName = clfName;
+        this.mClassifierName = clfName.trim().replaceAll(" ", "");
     }
 
     /**
@@ -293,7 +295,7 @@ public class DataObjectClassifier implements Serializable{
         for(final Instance instance : newInstances) mClassifier.updateClassifier(instance);
     }
 
-    private static weka.classifiers.UpdateableClassifier buildClassifier(Instances structure) {
+    private weka.classifiers.UpdateableClassifier buildClassifier(Instances structure) {
 
         Log.v(TAG, "Builiding classifier using "+structure.numInstances()+" instances...");
 
@@ -305,7 +307,6 @@ public class DataObjectClassifier implements Serializable{
         Log.v(TAG, "Balancing classes");
         structure = balanceClasses(structure);
 
-
         NaiveBayesUpdateable classifier = new NaiveBayesUpdateable();
 
         try {
@@ -313,13 +314,18 @@ public class DataObjectClassifier implements Serializable{
             /* set mClassifier properties */
             classifier.setUseSupervisedDiscretization(false);
             classifier.setDisplayModelInOldFormat(false);
-            classifier.setUseKernelEstimator(true);
+            classifier.setUseKernelEstimator(false);
             classifier.setDebug(DEBUG);
 
             /* build mClassifier with given instances */
             classifier.buildClassifier(structure);
 
-            if(DEBUG) Log.e(TAG, classifier.toString());
+            if(DEBUG)
+            {
+                FileWriter f = PersistentMemoryManager.getFileWriter(structure.relationName()+"_model.info");
+                f.write(classifier.toString());
+                f.close();
+            }Log.e(TAG, classifier.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -328,12 +334,14 @@ public class DataObjectClassifier implements Serializable{
         return classifier;
     }
 
-    public boolean InstancesToArff() {
+    public boolean InstancesToArff(final String fileName) {
         ArffSaver saver = new ArffSaver();
+        this.dataInstances.setRelationName(fileName);
         saver.setInstances(this.dataInstances);
         try {
-            final File outputArff = new File(FS_rootDirectory + "/" + this.mClassifierName + ".arff.gz");
-            saver.setCompressOutput(true);
+            final File parentDir = PersistentMemoryManager.getParentDirFile();
+            final File outputArff = new File(parentDir, fileName+ ".arff");
+            saver.setCompressOutput(false);
             saver.setFile(outputArff);
             saver.writeBatch();
             Log.i(TAG, "Saved raw-arff data to:" + outputArff.getAbsolutePath());
@@ -357,10 +365,5 @@ public class DataObjectClassifier implements Serializable{
         }
         return balanced;
     }
-
-//    private void updateRawData(final List<DataPair<DataObject, String>> dataWithLabels) {
-//        if(mLabeledRawData == null) mLabeledRawData = new ArrayList<>();
-//        mLabeledRawData.addAll(new ArrayList<>(dataWithLabels));
-//    }
 }
 

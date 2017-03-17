@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.RadarChart;
@@ -56,9 +58,9 @@ public class Fragment_PredictingScreen extends Fragment {
     /**
      * prediction related
      */
-    private static final Long predictionTimeoutHistoryMs = 10000L;
+    private static final Long predictionTimeoutHistoryMs = 1000L;
     private Handler mPredictionRequestHandler = new Handler();
-    private static final boolean ACCUMULATE = false;
+    private static boolean ACCUMULATE = false;
 
     /**
      * GUI related
@@ -92,58 +94,52 @@ public class Fragment_PredictingScreen extends Fragment {
     private Runnable mPredictionRequest = new Runnable() {
         @Override
         public void run() {
-            final Long now = System.currentTimeMillis();
-            final Long past = now - predictionTimeoutHistoryMs;
 
+            if(mAccumulatedDataAndLabels.size() > 0)
+            {
 
-            System.err.println("PREDICTION REQUEST accumulated data: " + mAccumulatedDataAndLabels.toString());
+                final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> dataWithDistributions = mIndoorMap.predictOnData(mAccumulatedDataAndLabels);
 
-            final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> distributionsWithData = mIndoorMap.predictOnData(mAccumulatedDataAndLabels);
+                if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
 
-            System.err.println("PREDICTION REQUEST RETURN: " + distributionsWithData.toString());
+                final Map<String, Double> distributions = dataWithDistributions.second;
 
-            System.err.println();
+                setRadarData(distributions);
 
-
-            if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
-
-            final Map<String, Double> distributions = distributionsWithData.second;
-
-            setRadarData(distributions);
-
-            if (DEBUG) {
-                for (final String location : distributions.keySet()) {
-                    Log.d("PREDICTIONS", location + " : " + distributions.get(location));
+                if (DEBUG) {
+                    for (final String location : distributions.keySet()) {
+                        Log.d("PREDICTIONS", location + " : " + distributions.get(location));
+                    }
                 }
+
+                String predictedLabel = "error";
+                final Double maxValue = Collections.max(distributions.values());
+                for (final String label : distributions.keySet())
+                    if (maxValue.equals(distributions.get(label))) predictedLabel = label;
+
+                updatePredictedLabel(predictedLabel);
+
+                yesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String currentLabel = predictLabelTextView.getText().toString();
+                        List<DataPair<DataObject, String>> unLabeledData = dataWithDistributions.first;
+                        for (DataPair singleData : unLabeledData) singleData.second = currentLabel;
+                        mIndoorMap.retrainWithData(unLabeledData);
+                        mAccumulatedDataAndLabels.clear();
+                    }
+                });
+
+                noButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final List<String> labels = new ArrayList<>(distributions.keySet());
+                        labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx + 1;
+                        if (labelIdx < labels.size()) updatePredictedLabelSilent(labels.get(labelIdx));
+                    }
+                });
+
             }
-
-            String predictedLabel = "error";
-            final Double maxValue = Collections.max(distributions.values());
-            for (final String label : distributions.keySet())
-                if (maxValue.equals(distributions.get(label))) predictedLabel = label;
-
-            // final String predictedLabel = distributions.keySet().forEach(key->distributions.get(key));
-            // final String predictedLabel = Collections.max(distributions.entrySet(), Map.Entry.comparingByValue()).getKey();
-            updatePredictedLabel(predictedLabel);
-
-            yesButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final String currentLabel = predictLabelTextView.getText().toString();
-                    List<DataPair<DataObject, String>> unLabeledData = distributionsWithData.first;
-                    for (DataPair singleData : unLabeledData) singleData.second = currentLabel;
-                    mIndoorMap.retrainWithData(unLabeledData);
-                }
-            });
-
-            noButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final List<String> labels = new ArrayList<>(distributions.keySet());
-                    labelIdx = (labelIdx >= labels.size()) ? 0 : labelIdx + 1;
-                    if (labelIdx < labels.size()) updatePredictedLabelSilent(labels.get(labelIdx));
-                }
-            });
 
             mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
         }
@@ -183,6 +179,15 @@ public class Fragment_PredictingScreen extends Fragment {
 
         TextView predictingLocationTextView = (TextView) rootView.findViewById(R.id.predicting_screen_location_text_view);
         predictingLocationTextView.setText(getArguments().getString(IndoorMap.TAG_LOCATION));
+
+        ToggleButton toggle = (ToggleButton) rootView.findViewById(R.id.accumulateButton);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+               ACCUMULATE = toggle.isChecked();
+            }
+        });
 
         Button finishPredictingButton = (Button) rootView.findViewById(R.id.button_finish_predicting);
         finishPredictingButton.setOnClickListener(new View.OnClickListener() {
@@ -264,7 +269,6 @@ public class Fragment_PredictingScreen extends Fragment {
 
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
-                System.err.println("PREDICTIONS OF ACTIVITIES: " + mActivities.toString());
                 return mActivities[(int) value % mActivities.length];
             }
         });
@@ -278,7 +282,10 @@ public class Fragment_PredictingScreen extends Fragment {
         data.setValueTextColor(Color.WHITE);
 
         mChart.setData(data);
-        mChart.animateXY(500, 500, Easing.EasingOption.EaseInOutCirc, Easing.EasingOption.EaseInOutCirc);
+        mChart.invalidate();;
+        //mChart.animate();
+        //mChart.animateY(100, Easing.EasingOption.EaseInCirc);
+        //mChart.animateXY(500, 500, Easing.EasingOption.EaseInExpo, Easing.EasingOption.EaseInExpo);
     }
 
     private void resetPredictedLabel() {

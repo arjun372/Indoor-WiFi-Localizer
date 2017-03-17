@@ -57,7 +57,7 @@ public class PersistentMemoryManager {
     }
 
     public static final Object loadObjectFile(final String objectFileName) throws IOException, ClassNotFoundException {
-        final File inputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG, objectFileName+".dat");
+        final File inputFile = new File(getParentDirFile(), objectFileName+".dat");
         ObjectInputStream objectInputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile)));
         Object object = objectInputStream.readObject();
         objectInputStream.close();
@@ -65,17 +65,19 @@ public class PersistentMemoryManager {
     }
 
     public static final void saveObjectFile(final String objectFileName, Object object) throws IOException {
-        final File parentDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG);
-        parentDir.mkdirs();
-        final File outputFile = new File(parentDir, objectFileName+".dat");
+        final File outputFile = new File(getParentDirFile(), objectFileName+".dat");
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
         objectOutputStream.writeObject(object);
         objectOutputStream.close();
     }
 
     public static FileWriter getFileWriter(final String fileName) throws IOException{
+        return new FileWriter(new File(getParentDirFile(), fileName));
+    }
+
+    public static File getParentDirFile(){
         final File parentDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + TAG);
         parentDir.mkdirs();
-        return new FileWriter(new File(parentDir, fileName));
+        return  parentDir;
     }
 }

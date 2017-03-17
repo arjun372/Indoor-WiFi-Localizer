@@ -40,19 +40,10 @@ public class IndoorMap implements Serializable{
 
     private String mMapName;
 
-    public IndoorMap(String mapName) {
-        this.mMapName     = mapName;
-      //  this.mVisualGraph = loadGraphFromRawFiles();
-      //  this.mImageFile   = loadImageFromRawFile();
-
-        this.mRawData   = loadRawDataFromFile(this.mMapName);
-        this.mClassifer = buildClassifier(this.mRawData, this.mMapName);
-    }
-
-    public IndoorMap(String mapName, ListenableGraph mVisualGraph, File imageFile) {
-        this.mMapName = mapName;
-        this.mVisualGraph = mVisualGraph;
-        this.mImageFile = imageFile;
+    public IndoorMap(final String mapName) {
+        this.mMapName   = mapName;
+        this.mRawData   = loadRawDataFromFile(mapName);
+        this.mClassifer = buildClassifier(this.mRawData, mapName);
     }
 
     private static DataObjectClassifier buildClassifier(final List<DataPair<DataObject, String>> dataWithLabels, final String clfName) {
@@ -66,10 +57,6 @@ public class IndoorMap implements Serializable{
         retrainWithData(dataWithLabels);
 
         saveRawDataToFile(this.mMapName);
-
-       // Log.v(TAG, "Saving to ARFF");
-      //  this.mClassifer.InstancesToArff();
-
         //TODO :: do everything that scanservice.trainclassifier does
         //TODO :: plus save yourself, who knows when you will be back?
     }
@@ -104,6 +91,7 @@ public class IndoorMap implements Serializable{
     private void saveRawDataToFile(final String filename) {
         try {
             PersistentMemoryManager.saveObjectFile(filename + ".raw", this.mRawData);
+            this.mClassifer.InstancesToArff(this.mMapName);
         } catch (Exception e) {
             e.printStackTrace();
         }
