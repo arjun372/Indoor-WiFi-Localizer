@@ -13,8 +13,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import blueguy.rf_localizer.Scanners.BluetoothScanner;
+import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
@@ -26,7 +27,7 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Fragment_TrainingScreen extends Fragment {
+public class Training_UI extends Fragment {
 
     private static final String TAG = "Training_Activity";
 
@@ -57,16 +58,16 @@ public class Fragment_TrainingScreen extends Fragment {
         }
     };
 
-    public static Fragment_TrainingScreen newInstance(String location) {
+    public static Training_UI newInstance(String location) {
         Bundle bundle = new Bundle();
         bundle.putString(IndoorMap.TAG_LOCATION, location);
         bundle.putBoolean(IndoorMap.TAG_TRAIN_ACTION, true);
-        Fragment_TrainingScreen fragment_trainingScreen = new Fragment_TrainingScreen();
+        Training_UI fragment_trainingScreen = new Training_UI();
         fragment_trainingScreen.setArguments(bundle);
         return fragment_trainingScreen;
     }
 
-    public Fragment_TrainingScreen() {
+    public Training_UI() {
         // Required empty public constructor
     }
 
@@ -148,9 +149,10 @@ public class Fragment_TrainingScreen extends Fragment {
     private void initScanners() {
         if (DEBUG) Log.d(TAG, "initScanners");
         this.mScannerList = new ArrayList<>();
+        //this.mScannerList.add(new BluetoothScanner(mScannerCallback));
         this.mScannerList.add(new WifiScanner(mScannerCallback));
+        //this.mScannerList.add(new CellScanner(mScannerCallback));
         //curScanners.add(new CellScanner(mScannerCallback));
-        //curScanners.add(new BluetoothScanner(mScannerCallback));
         //curScanners.add(new VelocityScanner(mScannerCallback));
         //curScanners.add(new RotationScanner(mScannerCallback));
         //curScanners.add(new MagneticFieldScanner(mScannerCallback));

@@ -16,7 +16,6 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
@@ -31,8 +30,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import blueguy.rf_localizer.Scanners.BluetoothScanner;
+import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
@@ -44,10 +44,10 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link Fragment_PredictingScreen#newInstance} factory method to
+ * Use the {@link Prediction_UI#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Fragment_PredictingScreen extends Fragment {
+public class Prediction_UI extends Fragment {
 
     private static final String TAG = "Predicting_Fragment";
 
@@ -58,7 +58,7 @@ public class Fragment_PredictingScreen extends Fragment {
     /**
      * prediction related
      */
-    private static final Long predictionTimeoutHistoryMs = 1000L;
+    private static final Long predictionTimeoutHistoryMs = 1500L;
     private Handler mPredictionRequestHandler = new Handler();
     private static boolean ACCUMULATE = false;
 
@@ -145,7 +145,7 @@ public class Fragment_PredictingScreen extends Fragment {
         }
     };
 
-    public Fragment_PredictingScreen() {
+    public Prediction_UI() {
         // Required empty public constructor
     }
 
@@ -153,11 +153,11 @@ public class Fragment_PredictingScreen extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment Fragment_PredictingScreen.
+     * @return A new instance of fragment Prediction_UI.
      */
     // TODO: Rename and change types and number of parameters
-    public static Fragment_PredictingScreen newInstance(String location) {
-        Fragment_PredictingScreen fragment = new Fragment_PredictingScreen();
+    public static Prediction_UI newInstance(String location) {
+        Prediction_UI fragment = new Prediction_UI();
         Bundle args = new Bundle();
         args.putString(IndoorMap.TAG_LOCATION, location);
         args.putBoolean(IndoorMap.TAG_TRAIN_ACTION, false);
@@ -311,8 +311,10 @@ public class Fragment_PredictingScreen extends Fragment {
     private void initScanners() {
         if (DEBUG) Log.d(TAG, "initScanners");
         this.mScannerList = new ArrayList<>();
+        //this.mScannerList.add(new BluetoothScanner(mScannerCallback));
         this.mScannerList.add(new WifiScanner(mScannerCallback));
-        //curScanners.add(new CellScanner(mScannerCallback));
+        //this.mScannerList.add(new CellScanner(mScannerCallback));
+        //this.mScannerList.add(new CellScanner(mScannerCallback));
         //curScanners.add(new BluetoothScanner(mScannerCallback));
         //curScanners.add(new VelocityScanner(mScannerCallback));
         //curScanners.add(new RotationScanner(mScannerCallback));

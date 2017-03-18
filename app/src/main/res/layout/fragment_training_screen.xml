@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="blueguy.rf_localizer.Fragment_TrainingScreen">
+    tools:context="blueguy.rf_localizer.Training_UI">
 
     <Space
         android:layout_width="match_parent"

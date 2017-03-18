@@ -50,8 +50,8 @@ import static blueguy.rf_localizer.BuildConfig.DEBUG;
  * and polygons to represent areas.
  */
 
-//public class Fragment_IndoorMap extends Fragment implements SensorEventListener{
-public class Fragment_IndoorMap extends Fragment {
+//public class Navigation_UI extends Fragment implements SensorEventListener{
+public class Navigation_UI extends Fragment {
 
 
     private static final String TAG = "Predicting_Fragment";
@@ -128,7 +128,7 @@ public class Fragment_IndoorMap extends Fragment {
         }
     };
 
-    public Fragment_IndoorMap() {
+    public Navigation_UI() {
         // Required empty public constructor
     }
 
@@ -136,11 +136,11 @@ public class Fragment_IndoorMap extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment Fragment_PredictingScreen.
+     * @return A new instance of fragment Prediction_UI.
      */
     // TODO: Rename and change types and number of parameters
-    public static Fragment_IndoorMap newInstance(String location) {
-        Fragment_IndoorMap fragment = new Fragment_IndoorMap();
+    public static Navigation_UI newInstance(String location) {
+        Navigation_UI fragment = new Navigation_UI();
         Bundle args = new Bundle();
         args.putString(IndoorMap.TAG_LOCATION, location);
         args.putBoolean(IndoorMap.TAG_TRAIN_ACTION, false);

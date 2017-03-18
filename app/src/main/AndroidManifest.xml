@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="blueguy.rf_localizer">
 
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+
     <uses-permission
         android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
         android:required="true" />
@@ -15,6 +17,10 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -53,31 +59,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".TestingActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait">
 
-            <!-- android:theme="@style/AppTheme.NoActionBar" -->
-            <!-- android:label="@string/title_activity_main" -->
-
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-        </activity>
-
-        <uses-library
-            android:name="com.google.android.wearable"
-            android:required="false" />
-
-        <service
-            android:name=".ScanService"
-            android:enabled="true"
-            android:exported="true" />
+        <uses-library android:name="com.google.android.wearable" android:required="false" />
 
     </application>
 

@@ -314,8 +314,8 @@ public class DataObjectClassifier implements Serializable{
             /* set mClassifier properties */
             classifier.setUseSupervisedDiscretization(false);
             classifier.setDisplayModelInOldFormat(false);
-            classifier.setUseKernelEstimator(false);
-            classifier.setDebug(DEBUG);
+            classifier.setUseKernelEstimator(true);
+            classifier.setDebug(false);
 
             /* build mClassifier with given instances */
             classifier.buildClassifier(structure);
