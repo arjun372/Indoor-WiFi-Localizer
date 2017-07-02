@@ -48,7 +48,8 @@ public abstract class Scanner {
         for(DataObject newItem : toAdd) {
 
             final Object key = newItem.mID;
-            final Long currentTime  = newItem.mTimeStamp + RF_Localizer_Application.timeOfBoot - (newItem.mTimeStamp % timestamp_bucketSize_Ms);
+//            final Long currentTime  = newItem.mTimeStamp + RF_Localizer_Application.timeOfBoot - (newItem.mTimeStamp % timestamp_bucketSize_Ms);
+            final Long currentTime  = newItem.mTimeStamp + (RF_Localizer_Application.timeOfBoot * 1000);
             final Long previousTime = mStaleEntries.get(key);
 
             if(previousTime == null || (previousTime < currentTime))

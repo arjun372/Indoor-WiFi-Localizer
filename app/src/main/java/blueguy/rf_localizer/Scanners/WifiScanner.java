@@ -51,7 +51,8 @@ public class WifiScanner extends Scanner {
         List<DataObject> networkDataObjects = new ArrayList<>();
         for (final ScanResult network : networks)
         {
-            final long timestampFound = network.timestamp/1000;
+//            final long timestampFound = network.timestamp/1000;
+            final long timestampFound = network.timestamp;
 
             final int dbm  = network.level;
             final int freq = network.frequency;
