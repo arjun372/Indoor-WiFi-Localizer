@@ -49,18 +49,17 @@ public class WifiScanner extends Scanner {
 
         /** Make a List of DataObject objects from the WiFi getScanResults **/
         List<DataObject> networkDataObjects = new ArrayList<>();
-        for (final ScanResult network : networks)
-        {
+        for (final ScanResult network : networks) {
 //            final long timestampFound = network.timestamp/1000;
             final long timestampFound = network.timestamp;
 
-            final int dbm  = network.level;
-            final int freq = network.frequency;
-            final int centerFreq0 = network.centerFreq0;
-            final int centerFreq1 = network.centerFreq1;
-            final int channel_width = network.channelWidth;
-            final int mimo = network.is80211mcResponder() ? 1 : 0;
-            final int passpoint = network.isPasspointNetwork() ? 1 : 0;
+            final int dbm = network.level;
+//            final int freq = network.frequency;
+//            final int centerFreq0 = network.centerFreq0;
+//            final int centerFreq1 = network.centerFreq1;
+//            final int channel_width = network.channelWidth;
+//            final int mimo = network.is80211mcResponder() ? 1 : 0;
+//            final int passpoint = network.isPasspointNetwork() ? 1 : 0;
 
             List<DataPair> networkDataVals = new ArrayList<>();
 
@@ -111,7 +110,8 @@ public class WifiScanner extends Scanner {
 
             /** Get scan results, update entries, and fire callback **/
             final Context context = RF_Localizer_Application.getAppContext();
-            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+//            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final List<ScanResult> networks = wifiManager.getScanResults();
             final List<DataObject> updatedEntries = updateEntries(networks);
             mScannerCallback.onScanResult(updatedEntries);
@@ -130,7 +130,8 @@ public class WifiScanner extends Scanner {
     private void setWifiLock(final boolean state) {
 
         final Context mContext = RF_Localizer_Application.getAppContext();
-        final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+//        final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        final WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (wifiLock == null) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
