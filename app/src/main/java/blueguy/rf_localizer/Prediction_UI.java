@@ -31,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import blueguy.rf_localizer.Scanners.BluetoothScanner;
-import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;
@@ -58,9 +56,9 @@ public class Prediction_UI extends Fragment {
     /**
      * prediction related
      */
-    private static final Long predictionTimeoutHistoryMs = 1500L;
+    private static final Long predictionTimeoutHistoryMs = 10000L;
     private Handler mPredictionRequestHandler = new Handler();
-    private static boolean ACCUMULATE = false;
+    private static volatile boolean ACCUMULATE = false;
 
     /**
      * GUI related
@@ -72,7 +70,7 @@ public class Prediction_UI extends Fragment {
     /**
      * indoor-map related
      **/
-    private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels;
+    private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels = new ArrayList<>();
     private IndoorMap mIndoorMap;
 
     /**
@@ -81,8 +79,8 @@ public class Prediction_UI extends Fragment {
     private List<Scanner> mScannerList;
     private ScannerCallback mScannerCallback = new ScannerCallback() {
         @Override
-        public void onScanResult(final List<DataObject> dataList) {
-            if (mAccumulatedDataAndLabels == null) mAccumulatedDataAndLabels = new ArrayList<>();
+        public void onScanResult(final List<DataObject> dataList)
+        {
             for (DataObject dataObject : dataList)
                 mAccumulatedDataAndLabels.add(new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN));
             //mAccumulatedDataAndLabels.addAll(dataList.stream().map(dataObject -> new DataPair<>(dataObject, DataObjectClassifier.CLASS_UNKNOWN)).collect(Collectors.toList()));
@@ -100,7 +98,9 @@ public class Prediction_UI extends Fragment {
 
                 final DataPair<List<DataPair<DataObject, String>>, Map<String, Double>> dataWithDistributions = mIndoorMap.predictOnData(mAccumulatedDataAndLabels);
 
-                if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
+                synchronized (this) {
+                    if (!ACCUMULATE) mAccumulatedDataAndLabels.clear();
+                }
 
                 final Map<String, Double> distributions = dataWithDistributions.second;
 
@@ -169,7 +169,7 @@ public class Prediction_UI extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_predicting_screen, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_predicting_screen, container, false);
 
         mChart = (RadarChart) rootView.findViewById(R.id.chart1);
         yesButton = (Button) rootView.findViewById(R.id.button_yes);
@@ -177,10 +177,10 @@ public class Prediction_UI extends Fragment {
 
         initRadarChart();
 
-        TextView predictingLocationTextView = (TextView) rootView.findViewById(R.id.predicting_screen_location_text_view);
+        final TextView predictingLocationTextView = (TextView) rootView.findViewById(R.id.predicting_screen_location_text_view);
         predictingLocationTextView.setText(getArguments().getString(IndoorMap.TAG_LOCATION));
 
-        ToggleButton toggle = (ToggleButton) rootView.findViewById(R.id.accumulateButton);
+        final ToggleButton toggle = (ToggleButton) rootView.findViewById(R.id.accumulateButton);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -208,20 +208,29 @@ public class Prediction_UI extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
+        //mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
         removeScanners();
         resetPredictedLabel();
-        mAccumulatedDataAndLabels.clear();
+        //mAccumulatedDataAndLabels.clear();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mAccumulatedDataAndLabels = new ArrayList<>();
+
+        if(mAccumulatedDataAndLabels == null)
+        {
+            mAccumulatedDataAndLabels = new ArrayList<>();
+        }
+        else
+        {
+            mAccumulatedDataAndLabels.clear();
+        }
+
         resetPredictedLabel();
         initIndoorMap();
         initScanners();
-        mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+        //mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
     }
 
     private void initRadarChart() {
@@ -310,17 +319,22 @@ public class Prediction_UI extends Fragment {
 
     private void initScanners() {
         if (DEBUG) Log.d(TAG, "initScanners");
-        this.mScannerList = new ArrayList<>();
-        //this.mScannerList.add(new BluetoothScanner(mScannerCallback));
+
+        if(mScannerList == null)
+        {
+            this.mScannerList = new ArrayList<>();
+        }
+        else
+        {
+            removeScanners();
+        }
+
+        // add wifi scanner
         this.mScannerList.add(new WifiScanner(mScannerCallback));
-        //this.mScannerList.add(new CellScanner(mScannerCallback));
-        //this.mScannerList.add(new CellScanner(mScannerCallback));
-        //curScanners.add(new BluetoothScanner(mScannerCallback));
-        //curScanners.add(new VelocityScanner(mScannerCallback));
-        //curScanners.add(new RotationScanner(mScannerCallback));
-        //curScanners.add(new MagneticFieldScanner(mScannerCallback));
-        //curScanners.add(new PressureScanner(mScannerCallback));
-        for (Scanner x : this.mScannerList) {
+
+        // start wifi-scanner
+        for (Scanner x : this.mScannerList)
+        {
             x.startScan();
         }
     }

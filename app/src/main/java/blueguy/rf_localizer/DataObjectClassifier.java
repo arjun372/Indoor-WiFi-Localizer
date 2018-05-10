@@ -41,6 +41,7 @@ public class DataObjectClassifier implements Serializable{
     private static final String FS_rootDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
     private static final String TAG = DataObjectClassifier.class.getSimpleName();
 
+    public static final long BIN_WIDTH = 1000L * 1000L * 1000L;
     private Instances dataInstances;
 
     public static final String CLASS_UNKNOWN = "here";
@@ -70,7 +71,7 @@ public class DataObjectClassifier implements Serializable{
      */
     public Map<String, Double> classify(List<DataPair<DataObject, String>> data) {
 
-        /** create a list of data with unknown labels **/
+        /* create a list of data with unknown labels */
         for(DataPair singleData : data)
         {
             singleData.second = CLASS_UNKNOWN;
@@ -142,7 +143,6 @@ public class DataObjectClassifier implements Serializable{
 
             /* Handle first part -> DataObject here */
             final String dataObjectID = dataPair.first.mID;
-            final Long dataObjectTime = dataPair.first.mTimeStamp;
             final List<DataPair> dataObjectVals = dataPair.first.mDataVals;
 
             /* Iterate over DataPair list, concatenating each key with @dataObjectID to create a unique feature name */
@@ -218,7 +218,7 @@ public class DataObjectClassifier implements Serializable{
         for(final DataPair<DataObject, String> dataPair : dataWithLabels)
         {
             final String label = (dataPair.second);
-            final Long timestamp = dataPair.first.mTimeStamp;
+            final Long timestamp = dataPair.first.mTimeStamp - (dataPair.first.mTimeStamp % BIN_WIDTH);
             final List<DataPair> dataObjectVals = dataPair.first.mDataVals;
 
             /* Step 5 */

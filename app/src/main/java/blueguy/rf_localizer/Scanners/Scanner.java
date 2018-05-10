@@ -27,8 +27,6 @@ public abstract class Scanner {
 
     private PowerManager.WakeLock mPowerLock;
 
-    private long timestamp_bucketSize_Ms = 1000;
-
     protected Scanner(ScannerCallback scannerCallback) {
         mScannerCallback = scannerCallback;
     }
@@ -49,7 +47,7 @@ public abstract class Scanner {
 
             final Object key = newItem.mID;
 //            final Long currentTime  = newItem.mTimeStamp + RF_Localizer_Application.timeOfBoot - (newItem.mTimeStamp % timestamp_bucketSize_Ms);
-            final Long currentTime  = newItem.mTimeStamp + (RF_Localizer_Application.timeOfBoot * 1000);
+            final Long currentTime  = newItem.mTimeStamp + (RF_Localizer_Application.timeAtBootMs * 1000L * 1000L);
             final Long previousTime = mStaleEntries.get(key);
 
             if(previousTime == null || (previousTime < currentTime))

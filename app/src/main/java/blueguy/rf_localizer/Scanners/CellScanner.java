@@ -2,6 +2,7 @@ package blueguy.rf_localizer.Scanners;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
@@ -89,7 +90,7 @@ public class CellScanner extends Scanner {
 
         for(Object singleCellInfo :neighCells) {
 
-            long timestamp = System.currentTimeMillis() - RF_Localizer_Application.timeOfBoot;
+            long timestamp = SystemClock.elapsedRealtimeNanos();
             String identity = "cell_tower";
 
             int dbm     = 0;
@@ -118,7 +119,7 @@ public class CellScanner extends Scanner {
             if(singleCellInfo instanceof CellInfoWcdma)
             {
                 final CellInfoWcdma info = (CellInfoWcdma) singleCellInfo;
-                timestamp = (info.getTimeStamp() / 1000000);
+                timestamp = info.getTimeStamp();
                 identity = String.valueOf(info.getCellIdentity().getCid());
 
                 dbm = info.getCellSignalStrength().getDbm();
@@ -129,7 +130,7 @@ public class CellScanner extends Scanner {
             if (singleCellInfo instanceof CellInfoCdma)
             {
                 CellInfoCdma info = (CellInfoCdma) singleCellInfo;
-                timestamp = (info.getTimeStamp() / 1000000);
+                timestamp = info.getTimeStamp();
                 identity = String.valueOf(info.getCellIdentity().getBasestationId());
 
                 dbm = info.getCellSignalStrength().getDbm();
@@ -149,7 +150,7 @@ public class CellScanner extends Scanner {
             if (singleCellInfo instanceof CellInfoLte)
             {
                 CellInfoLte info = (CellInfoLte) singleCellInfo;
-                timestamp = (info.getTimeStamp() / 1000000);
+                timestamp = info.getTimeStamp();
                 identity = String.valueOf(info.getCellIdentity().getCi());
 
                 dbm = info.getCellSignalStrength().getDbm();
@@ -162,7 +163,7 @@ public class CellScanner extends Scanner {
             if (singleCellInfo instanceof CellInfoGsm)
             {
                 CellInfoGsm info = (CellInfoGsm) singleCellInfo;
-                timestamp = (info.getTimeStamp() / 1000000);
+                timestamp = info.getTimeStamp();
                 identity = String.valueOf(info.getCellIdentity().getCid());
 
                 dbm = info.getCellSignalStrength().getDbm();

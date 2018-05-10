@@ -49,7 +49,7 @@ public class BluetoothScanner extends Scanner {
         List<DataObject> beaconDataObjects = new ArrayList<>();
         for (final ScanResult iBeacon : iBeacons)
         {
-            final long timestampFound = iBeacon.getTimestampNanos() / 1000000;
+            final long timestampFound = iBeacon.getTimestampNanos();
 
             final String ID         = iBeacon.getDevice().getAddress();
             final int dbm           = iBeacon.getRssi();

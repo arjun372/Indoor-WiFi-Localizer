@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class WifiScanner extends Scanner {
         List<DataObject> networkDataObjects = new ArrayList<>();
         for (final ScanResult network : networks) {
 //            final long timestampFound = network.timestamp/1000;
-            final long timestampFound = network.timestamp;
+            final long timestampFound = network.timestamp * 1000L;
 
             final int dbm = network.level;
 //            final int freq = network.frequency;
@@ -72,6 +73,8 @@ public class WifiScanner extends Scanner {
 //            networkDataVals.add(new DataPair<>("center_freq1", centerFreq1));
 
             final DataObject newNetwork = new DataObject(timestampFound, network.BSSID, networkDataVals);
+            //Log.e("Wifi-Time", "Timestamp:"+(newNetwork.mTimeStamp + System.currentTimeMillis()*1000L*1000L));
+
             networkDataObjects.add(newNetwork);
         }
 

@@ -10,7 +10,7 @@ import android.os.SystemClock;
 
 public class RF_Localizer_Application extends Application {
 
-    public static final long timeOfBoot = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+    public static final long timeAtBootMs = (System.currentTimeMillis() - SystemClock.elapsedRealtime());
     private static Context mContext;
 
     public void onCreate() {
