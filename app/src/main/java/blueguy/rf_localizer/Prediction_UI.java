@@ -56,7 +56,7 @@ public class Prediction_UI extends Fragment {
     /**
      * prediction related
      */
-    private static final Long predictionTimeoutHistoryMs = 10000L;
+    private static final Long predictionTimeoutHistoryMs = 1000L;
     private Handler mPredictionRequestHandler = new Handler();
     private static volatile boolean ACCUMULATE = false;
 
@@ -68,7 +68,7 @@ public class Prediction_UI extends Fragment {
     private RadarChart mChart;
 
     /**
-     * indoor-map related
+     * indoor-map relatedk
      **/
     private List<DataPair<DataObject, String>> mAccumulatedDataAndLabels = new ArrayList<>();
     private IndoorMap mIndoorMap;
@@ -208,10 +208,10 @@ public class Prediction_UI extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        //mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
+        mPredictionRequestHandler.removeCallbacks(mPredictionRequest);
         removeScanners();
         resetPredictedLabel();
-        //mAccumulatedDataAndLabels.clear();
+        mAccumulatedDataAndLabels.clear();
     }
 
     @Override
@@ -230,7 +230,7 @@ public class Prediction_UI extends Fragment {
         resetPredictedLabel();
         initIndoorMap();
         initScanners();
-        //mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
+        mPredictionRequestHandler.postDelayed(mPredictionRequest, predictionTimeoutHistoryMs);
     }
 
     private void initRadarChart() {

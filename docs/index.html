@@ -68,13 +68,18 @@ the possibility of using different learning methods.</p>
         <h5>Contents</h5>
         <hr>
         <ol type="i">
-          <li><a href=#11>The Problem</a></li>
-          <li><a href=#0>Demo</a></li>
-          <li><a href="#1">System Overview</a>
-              <ul style="list-style-type:disc"></ul>
+          <li><a href=#0>The Problem</a></li>
+          <li><a href=#1>Demo</a></li>
+          <li><a href="#2">System Overview</a>
+              <ul style="list-style-type:disc">
+                <li><a href="#3">Stage 1: Training</a></li>
+                <li><a href="#4">Stage 2: Prediction</a></li>
+                <li><a href="#5">Stage 3: Online Learning</a></li>
+              </ul>
           </li>
-          <li><a href="#9">Examples</a></li>
-          <li><a href="#10">Instructions</a></li>
+          <li><a href="#6">Evaluation & Results</a>
+          <li><a href="#7">Examples</a></li>
+          <li><a href="#8">Instructions</a></li>
         </ol>
       </toc>
 
@@ -86,18 +91,44 @@ the possibility of using different learning methods.</p>
 
     </p>
 
-    <h3 id="0">Demo</h3>
+    <h3 id="1">Demo</h3>
     <hr>
     ​<iframe class="full centered" style="width:748px" height="420"  src="https://www.youtube-nocookie.com/embed/INk1wZmbwP0?rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-    <h3 id="1">System Overview</h3>
+    <h3 id="2">System Overview</h3>
     <hr>
 
-    <h3 id="9">Examples</h3>
+    <h4 id="3">Stage 1: Training</h4>
+    <hr>
+    <p>
+    <img class="lg_thumb" src="assets/ui/training.png"/>
+    We begin by training a new location for the given map, in this case it happens to be 'Selby House'
+    and this current location is labeled as 'Attic'. Since the classifier is a generalized multiclass
+    binary classifier, atleast two location labels are required for the classifier to work.
+    </p>
+
+    <h4 id="3">Stage 2: Prediction</h4>
+    <hr>
+    <p>
+    <img class="lg_thumb" src="assets/ui/predict2.png"/>
+    </p>
+
+    <h4 id="3">Stage 3: Online Learning</h4>
+    <hr>
+    <p>
+    <img class="lg_thumb" src="assets/ui/predict3.png"/>
+    </p>
+
+    <h3 id="6">Evaluation & Results</h3>
     <hr>
 
-    <h3 id="10">Instructions</h3>
+    <h3 id="7">Examples</h3>
     <hr>
+
+    <h3 id="8">Instructions</h3>
+    <hr>
+
+
     </section>
 
     <div class="copyright">
