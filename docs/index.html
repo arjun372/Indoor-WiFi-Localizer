@@ -19,9 +19,9 @@
 
   <link rel="stylesheet" href="https://arjun372.github.io/stylesheets/base.css">
 	<link rel="stylesheet" href="https://arjun372.github.io/stylesheets/skeleton.css">
-	<link rel="stylesheet" href="stylesheets/layout.css">
-  <link rel="stylesheet" href="stylesheets/toc.css">
-  <link rel="stylesheet" href="stylesheets/table.css">
+	<link rel="stylesheet" href="https://arjun372.github.io/stylesheets/layout.css">
+  <link rel="stylesheet" href="https://arjun372.github.io/stylesheets/toc.css">
+  <link rel="stylesheet" href="https://arjun372.github.io/stylesheets/table.css">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
@@ -45,7 +45,7 @@ indoor localization service to complement the outdoor GPS
 systems so widely prevalent today. Using WiFi based RSSI
 fingerprinting and machine learning, we build and test Bayesian
 models in at-home and public locations, with f-measures of 0.893
-for 14 points of interest in a hallway and 0.994 with 6 rooms
+for 14 points of interest in a hallway and 0.994 with 10 area of interest (rooms and hallways)
 within a house. The current implementation differentiates itself
 from the other various existing ventures because of its independence
 from a uniquely designed and installed infrastructure -
@@ -53,15 +53,15 @@ the program runs indoor positioning by sensing and analyzing
 only the ambient signals of a given location without relying on
 explicitly placed beacons, or other signal generating objects. After
 detecting the powers (RSSI) of the numerous radio signals (WiFi
-was used for most tests), we use machine learning to identify
+was used for most tests), we use bayesian learning to identify
 numerous checkpoints set by the user during training. Future
 work will involve better GUI design for indoor navigation and
 the possibility of using different learning methods.</p>
       </section>
       <section>
       <div style="text-align:center">
-        <a class="button" href="https://github.com/arjun372/Deriche-Edges-HoughTransform/archive/master.zip"><h4 class="source">Download Source Code</h4></a>
-        <a class="button" href="https://github.com/arjun372/Deriche-Edges-HoughTransform/"><h4 class="git">Git Repo</h4></a>
+        <a class="button" href="https://github.com/arjun372/Indoor-WiFi-Localizer/archive/master.zip"><h4 class="source">Download Source Code</h4></a>
+        <a class="button" href="https://github.com/arjun372/Indoor-WiFi-Localizer"><h4 class="git">Git Repo</h4></a>
       </div>
       </section>
       <toc>
@@ -69,16 +69,9 @@ the possibility of using different learning methods.</p>
         <hr>
         <ol type="i">
           <li><a href=#11>The Problem</a></li>
+          <li><a href=#0>Demo</a></li>
           <li><a href="#1">System Overview</a>
-              <ul style="list-style-type:disc">
-                <li><a href="#2">Stage 1: Read Bitmap as Matrix</a>
-                <li><a href="#3">Stage 2: Deriche Blur Filter</a>
-                <li><a href="#4">Stage 3: Otsu's Thresholder</a>
-                <li><a href="#5">Stage 4: Deriche Gradient Filter</a>
-                <li><a href="#6">Stage 5: Hysteresis Thresholding</a>
-                <li><a href="#7">Stage 6: Hough Transform</a>
-                <li><a href="#8">Stage 7: Edge Count & Orientation</a>
-              </ul>
+              <ul style="list-style-type:disc"></ul>
           </li>
           <li><a href="#9">Examples</a></li>
           <li><a href="#10">Instructions</a></li>
@@ -87,156 +80,22 @@ the possibility of using different learning methods.</p>
 
     <section>
 
+    <h3 id="0">The Problem</h3>
+    <hr>
+    <p>
+
+    </p>
+
     <h3 id="0">Demo</h3>
     <hr>
-    <p style="text-align:center;" >
-    ​<iframe class="sixteen columns" style="border:3px solid red" width="560" height="315"  src="https://www.youtube-nocookie.com/embed/INk1wZmbwP0?rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </p>
+    ​<iframe class="full centered" style="width:748px" height="420"  src="https://www.youtube-nocookie.com/embed/INk1wZmbwP0?rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
     <h3 id="1">System Overview</h3>
     <hr>
-    <!-- <pre><code class="c">int main() {
-      int x = 32;
-      for(x = 0 ; x < 32; x++) {
-        printf("hello\n");
-      }
-    }</code></pre> -->
 
-    <!--  Stage 1 -->
-    <h4 id="2">Stage 1: Read Bitmap as Matrix</h4>
-    <hr>
-
-    <!--  Stage 2 -->
-    <h4 id="3">Stage 2: Deriche Blur Filter</h4>
-    <hr>
-
-    <!--  Stage 3 -->
-    <h4 id="4">Stage 3: Otsu's Thresholder</h4>
-    <hr>
-
-    <!--  Stage 4 -->
-    <h4 id="5">Stage 4: Deriche Gradient Filter</h4>
-    <hr>
-
-    <!--  Stage 5 -->
-    <h4 id="6">Stage 5: Hysteresis Thresholding</h4>
-    <hr>
-
-    <!--  Stage 6 -->
-    <h4 id="7">Stage 6: Hough Transform</h4>
-    <hr>
-
-    <!--  Stage 7 -->
-    <h4 id="8">Stage 7: Edge Count & Orientation</h4>
-    <hr>
-
-    </section>
-
-    <section>
     <h3 id="9">Examples</h3>
     <hr>
-    <table class="toc">
-      <caption>Step-by-step execution</caption>
-      <tr class="table_header">
-        <th></th>
-        <th>image1.bmp</th>
-        <th>hexagon.bmp</th>
-        <th>diamond.bmp</th>
-      </tr>
-      <tr>
-        <td class="tag"><p>Source</p></td>
-        <td><img class="med_thumb" src="examples/image1.bmp"/></td>
-        <td><img class="med_thumb" src="examples/hexagon.bmp"/></td>
-        <td><img class="med_thumb" src="examples/diamond.bmp"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Read</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.gray.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.gray.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.gray.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Blur</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.blur.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.blur.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.blur.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Otsu Threshold</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.otsu.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.otsu.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.otsu.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>X-Gradient</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.xgrad.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.xgrad.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.xgrad.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Y-Gradient</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.ygrad.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.ygrad.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.ygrad.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Gradient Magnitude</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.gradOnly.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.gradOnly.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.gradOnly.png"/></td>
-      </tr>
-      <tr class="arrow">
-        <td></td>
-        <td>↓</td>
-        <td>↓</td>
-        <td>↓</td>
-      </tr>
-      <tr>
-        <td class="tag"><p>Hough Transform</p></td>
-        <td><img class="med_thumb" src="sample_outputs/image1/image1.hough.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/hexagon/hexagon.hough.png"/></td>
-        <td><img class="med_thumb" src="sample_outputs/diamond/diamond.hough.png"/></td>
-      </tr>
-    </table>
-    </section>
 
-    <section>
     <h3 id="10">Instructions</h3>
     <hr>
     </section>
