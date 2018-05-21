@@ -12,9 +12,6 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        jackOptions {
-            enabled true
-        }
         resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
 
     }
@@ -36,9 +33,6 @@ android {
             minifyEnabled true
             zipAlignEnabled true
             proguardFiles 'proguard-android-JACK.txt-2.2.0-alpha1'
-            jackOptions {
-                enabled true
-            }
         }
 
     }
