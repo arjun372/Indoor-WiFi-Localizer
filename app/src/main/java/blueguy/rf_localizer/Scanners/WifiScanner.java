@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class WifiScanner extends Scanner {
     private BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             /** Get scan results, update entries, and fire callback **/
             final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             final List<ScanResult> networks = wifiManager.getScanResults();
@@ -113,7 +111,6 @@ public class WifiScanner extends Scanner {
 
             /** Get scan results, update entries, and fire callback **/
             final Context context = RF_Localizer_Application.getAppContext();
-//            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             final WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final List<ScanResult> networks = wifiManager.getScanResults();
             final List<DataObject> updatedEntries = updateEntries(networks);
@@ -133,7 +130,6 @@ public class WifiScanner extends Scanner {
     private void setWifiLock(final boolean state) {
 
         final Context mContext = RF_Localizer_Application.getAppContext();
-//        final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         final WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (wifiLock == null) {

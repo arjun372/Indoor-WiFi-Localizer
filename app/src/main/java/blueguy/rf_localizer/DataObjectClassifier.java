@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.utils.DataPair;
@@ -33,7 +31,7 @@ import weka.filters.supervised.instance.ClassBalancer;
 import static blueguy.rf_localizer.BuildConfig.DEBUG;
 
 /**
- * Created by work on 3/6/17.
+ * Created by Arjun on 3/6/17.
  */
 
 public class DataObjectClassifier implements Serializable{
@@ -300,8 +298,8 @@ public class DataObjectClassifier implements Serializable{
         Log.v(TAG, "Builiding classifier using "+structure.numInstances()+" instances...");
 
         /* Randomize data */
-        Log.v(TAG, "Randomizing instances");
-        structure.randomize(new Random());
+        //Log.v(TAG, "Randomizing instances");
+        //structure.randomize(new Random());
 
         /* Balance classes */
         Log.v(TAG, "Balancing classes");
@@ -314,7 +312,7 @@ public class DataObjectClassifier implements Serializable{
             /* set mClassifier properties */
             classifier.setUseSupervisedDiscretization(false);
             classifier.setDisplayModelInOldFormat(false);
-            classifier.setUseKernelEstimator(true);
+            classifier.setUseKernelEstimator(false);
             classifier.setDebug(false);
 
             /* build mClassifier with given instances */

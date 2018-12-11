@@ -14,8 +14,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import blueguy.rf_localizer.Scanners.BluetoothScanner;
-import blueguy.rf_localizer.Scanners.CellScanner;
 import blueguy.rf_localizer.Scanners.DataObject;
 import blueguy.rf_localizer.Scanners.Scanner;
 import blueguy.rf_localizer.Scanners.ScannerCallback;

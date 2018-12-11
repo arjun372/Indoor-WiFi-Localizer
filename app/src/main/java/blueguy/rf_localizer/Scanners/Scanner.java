@@ -3,7 +3,6 @@ package blueguy.rf_localizer.Scanners;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,9 +59,7 @@ public abstract class Scanner {
                     updated.add(newItem);
                 }
             }
-
         }
-
         return updated;
     }
 
